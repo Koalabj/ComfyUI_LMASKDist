@@ -104,6 +104,8 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
+		print(f'face_mask:{face_mask}')
+		print(f'body_mask:{body_mask}')
 		expanded_mask = pil_to_tensor(face_mask)
 		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
