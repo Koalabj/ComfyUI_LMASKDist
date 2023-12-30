@@ -97,8 +97,7 @@ class LoadImageUrl:
             }
 		}
 
-	RETURN_TYPES = ("IMAGE")
-	RETURN_NAMES = ("image")
+	RETURN_TYPES = ("IMAGE",)
 	FUNCTION = "load_image_url"
 	CATEGORY = "remote"
 
