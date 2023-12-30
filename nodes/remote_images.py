@@ -102,7 +102,7 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		expanded_mask = face_mask.copy()
+		expanded_mask = face_mask
 		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
 		# 参数定义
@@ -110,7 +110,7 @@ class LoadImageUrl:
 		Vertical_num = 200
 		expanded_mask, contours = Borad_draw(threshold, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		expanded_mask_copy = Borad_PengZhang(expanded_mask, contours)
-		body=cv2.threshold(body_mask.copy(), 128, 255, cv2.THRESH_BINARY)
+		body=cv2.threshold(body_mask, 128, 255, cv2.THRESH_BINARY)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
