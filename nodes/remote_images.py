@@ -105,9 +105,7 @@ class LoadImageUrl:
 
 	def load_image_url(self, face_mask,body_mask):
 		image = np.asarray(face_mask)
-		img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
-		expanded_mask = cv2.imdecode(img,cv2.IMREAD_GRAYSCALE)
-		expanded_mask = cv2.imdecode(face_mask,cv2.IMREAD_GRAYSCALE)
+		expanded_mask = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
 		# 参数定义
