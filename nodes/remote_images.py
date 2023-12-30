@@ -104,7 +104,7 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		image = np.asarray(bytearray(face_mask), dtype="uint8")
+		image = np.asarray(face_mask)
 		expanded_mask = cv2.imdecode(image,cv2.IMREAD_GRAYSCALE)
 		expanded_mask = cv2.imdecode(face_mask,cv2.IMREAD_GRAYSCALE)
 		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
