@@ -91,7 +91,10 @@ class LoadImageUrl:
 			"required": {
 				"face_mask": ("IMAGE",),
 				"body_mask": ("IMAGE",)
-			}
+			},
+            "optional": {
+                "image": ("IMAGE",)
+            }
 		}
 
 	RETURN_TYPES = ("IMAGE")
