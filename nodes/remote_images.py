@@ -111,7 +111,9 @@ class LoadImageUrl:
 		# _, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		expanded_mask = cv2.convertScaleAbs(expanded_mask)
 		# _, threshold = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-		contours, threshold = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
+
+		contours, threshold = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
