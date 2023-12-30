@@ -80,7 +80,13 @@ def Borad_PengZhang(expanded_mask, contour):
 
     return expanded_mask
 
-
+def pil_to_tensor(image):
+    # Takes a PIL image and returns a tensor of shape [1, height, width, channels]
+    image = np.array(image).astype(np.float32) / 255.0
+    image = torch.from_numpy(image).unsqueeze(0)
+    if len(image.shape) == 3:  # If the image is grayscale, add a channel dimension
+        image = image.unsqueeze(-1)
+    return image
 class LoadImageUrl:
 	def __init__(self):
 		pass
@@ -102,7 +108,7 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		expanded_mask = face_mask
+		expanded_mask = pil_to_tensor(face_mask)
 		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
 		# 参数定义
@@ -110,7 +116,7 @@ class LoadImageUrl:
 		Vertical_num = 200
 		expanded_mask, contours = Borad_draw(threshold, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		expanded_mask_copy = Borad_PengZhang(expanded_mask, contours)
-		body=cv2.threshold(body_mask, 128, 255, cv2.THRESH_BINARY)
+		body=cv2.threshold(pil_to_tensor(body_mask), 128, 255, cv2.THRESH_BINARY)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
