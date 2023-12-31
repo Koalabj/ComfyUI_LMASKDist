@@ -104,16 +104,20 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		image = np.asarray(face_mask)
-		img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-		expanded_mask = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+		numpy_image=face_mask.cpu().numpy()  
+		face_mask_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+		if face_mask_image.shape[0] == 3:
+			face_mask_image = face_mask_image.transpose(1, 2, 0)
+        	# 转换为灰度图像
+		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
+		
 		# expanded_mask = cv2.imdecode(face_mask,cv2.IMREAD_GRAYSCALE)
 		# _, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
-		expanded_mask = cv2.convertScaleAbs(expanded_mask)
+		# expanded_mask = cv2.convertScaleAbs(expanded_mask)
 		# _, threshold = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-		_, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
+		_, threshold = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
 
-		contours, threshold = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+		# contours, threshold = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
