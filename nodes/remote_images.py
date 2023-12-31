@@ -127,12 +127,12 @@ class LoadImageUrl:
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 200
 		expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
-		expanded_mask_copy = Borad_PengZhang(expanded_mask, contours)
+		expanded_mask_copy = borad_pz(expanded_mask, contours)
 		body=im_read(body_mask)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
-		return (img_face_expect_body,)
+		return (torch.cat(img_face_expect_body),)
 
 
 
