@@ -133,7 +133,8 @@ class LoadImageUrl:
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
 		img_face_expect_body = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
-		return (img_face_expect_body,)
+        
+		return (torch.cat(img_face_expect_body),)
 
 
 
