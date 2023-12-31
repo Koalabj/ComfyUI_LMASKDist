@@ -10,7 +10,22 @@ from io import BytesIO
 import cv2
 import random
 
-# def Direction_face_ZuoBiao(threshold, dis):
+#处理为灰度图
+def im_read(face_mask):
+	numpy_image=face_mask.cpu().numpy()  
+	face_mask_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+	if face_mask_image.shape[0] == 3:
+		face_mask_image = face_mask_image.transpose(1, 2, 0)
+        # 转换为灰度图像
+		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
+	if face_mask_image.shape[0] == 1:
+		face_mask_image = face_mask_image.squeeze(0)
+	_, threshold_image = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
+	if len(threshold_image.shape) != 2:
+		threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
+	threshold_image = np.uint8(threshold_image)
+	return threshold_image
+    
 def Direction_face_ZuoBiao(threshold):
     # 轮廓检测
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -77,7 +92,9 @@ def Borad_PengZhang(expanded_mask, contour):
                 expanded_mask[y, x] = 255
                 print('(' + str(x) + ',' + str(y) + '),是轮廓中的点')
     print('填充完毕')
-
+    return expanded_mask
+def borad_pz(expanded_mask, contour):
+    cv2.drawContours(expanded_mask, [contour], -1, (255), thickness=cv2.FILLED)
     return expanded_mask
 
 def pil_to_tensor(source_image):
@@ -104,33 +121,14 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		numpy_image=face_mask.cpu().numpy()  
-		face_mask_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-		if face_mask_image.shape[0] == 3:
-			face_mask_image = face_mask_image.transpose(1, 2, 0)
-        	# 转换为灰度图像
-			face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
-		if face_mask_image.shape[0] == 1:
-			face_mask_image = face_mask_image.squeeze(0)
-          
-		
-		# expanded_mask = cv2.imdecode(face_mask,cv2.IMREAD_GRAYSCALE)
-		# _, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
-		# expanded_mask = cv2.convertScaleAbs(expanded_mask)
-		# _, threshold = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-		_, threshold_image = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
-		if len(threshold_image.shape) != 2:
-			threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
-		threshold_image = np.uint8(threshold_image)
-		# contours, threshold = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+		threshold_image=im_read(face_mask)
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold_image)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 200
 		expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		expanded_mask_copy = Borad_PengZhang(expanded_mask, contours)
-		bodymask=cv2.imdecode(body_mask,cv2.IMREAD_GRAYSCALE)
-		body=cv2.threshold(bodymask, 128, 255, cv2.THRESH_BINARY)
+		body=im_read(body_mask)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
