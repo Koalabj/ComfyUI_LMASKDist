@@ -109,7 +109,10 @@ class LoadImageUrl:
 		if face_mask_image.shape[0] == 3:
 			face_mask_image = face_mask_image.transpose(1, 2, 0)
         	# 转换为灰度图像
-		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
+			face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
+		if face_mask_image.shape[0] == 1:
+			face_mask_image = face_mask_image.squeeze(0)
+          
 		
 		# expanded_mask = cv2.imdecode(face_mask,cv2.IMREAD_GRAYSCALE)
 		# _, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
