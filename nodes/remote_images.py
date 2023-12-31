@@ -118,14 +118,16 @@ class LoadImageUrl:
 		# _, threshold = cv2.threshold(expanded_mask, 128, 255, cv2.THRESH_BINARY)
 		# expanded_mask = cv2.convertScaleAbs(expanded_mask)
 		# _, threshold = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-		_, threshold = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
-
+		_, threshold_image = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
+		if len(threshold_image.shape) != 2:
+			threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
+		threshold_image = np.uint8(threshold_image)
 		# contours, threshold = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold)
+		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold_image)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 200
-		expanded_mask, contours = Borad_draw(threshold, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
+		expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		expanded_mask_copy = Borad_PengZhang(expanded_mask, contours)
 		bodymask=cv2.imdecode(body_mask,cv2.IMREAD_GRAYSCALE)
 		body=cv2.threshold(bodymask, 128, 255, cv2.THRESH_BINARY)
