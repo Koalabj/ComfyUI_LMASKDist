@@ -136,7 +136,7 @@ class LoadImageUrl:
 		torch_img = torch.from_numpy(img_face_expect_body)
 
 		torch_img=torch_img.permute(2, 0, 1)
-		return (torch.cat(torch_img),)
+		return (torch_img,)
 
 
 
