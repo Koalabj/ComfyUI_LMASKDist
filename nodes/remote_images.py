@@ -3,12 +3,14 @@ import json
 import torch
 import requests
 import numpy as np
-from PIL import Image
+from PIL import Image,ImageDraw
 from PIL.PngImagePlugin import PngInfo
 from base64 import b64encode
 from io import BytesIO
 import cv2
 import random
+import math
+
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
     numpy_image = np.array(pil_image)
@@ -69,8 +71,6 @@ def find_center_and_max_radius(mask):
     """
     # 找到白色区域的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    max_contour = max(contours, key=cv2.contourArea)
-    contours_squeeze = max_contour.squeeze()
 
     # 初始化最大半径和中心点
     max_radius = 0
@@ -83,7 +83,41 @@ def find_center_and_max_radius(mask):
             max_radius = radius
             center_x, center_y = x, y
 
-    return contours_squeeze,(int(center_x), int(center_y)), int(max_radius)
+    return (int(center_x), int(center_y)), int(max_radius)
+
+def draw_irregular_shape_with_cv2(center_x, center_y, min_radius, max_radius, image_size):
+    """
+    使用OpenCV绘制不规则图形。
+
+    :param center_x: 中心点的 X 坐标
+    :param center_y: 中心点的 Y 坐标
+    :param min_radius: 最小半径
+    :param max_radius: 最大半径
+    :param image_size: 图像尺寸 (宽度, 高度)
+    :return: OpenCV 图像
+    """
+    # 创建一个黑色背景图像
+    img = np.zeros((image_size[1], image_size[0], 3), dtype=np.uint8)
+
+    # 生成随机多边形的顶点
+    num_points = random.randint(5, 10)  # 随机选择 5 到 10 个顶点
+    points = []
+    for _ in range(num_points):
+        angle = random.uniform(0, 2 * math.pi)  # 随机角度
+        r = random.uniform(min_radius, max_radius)  # 随机半径
+        x = int(center_x + r * math.cos(angle))
+        y = int(center_y + r * math.sin(angle))
+        points.append([x, y])
+
+    # 将点转换为适合OpenCV的格式
+    pts = np.array([points], np.int32)
+    pts = pts.reshape((-1, 1, 2))
+
+    # 绘制多边形
+    cv2.fillPoly(img, [pts], (255, 255, 255))
+
+    return img
+
 def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x, center_y):
     # 如何区别上左右轮廓的点呢？ 计算到中心点坐标的xy坐标值      contours[y, x]
     for i in range(len(qualified_Zuobiao)):
@@ -119,18 +153,7 @@ def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x
 
     return threshold, contours_squeeze
 
-def Borad_PengZhang(expanded_mask, contour):
-    # 遍历图像的每个像素
-    for y in range(expanded_mask.shape[0]):
-        for x in range(expanded_mask.shape[1]):
-            point = (x, y)
-            is_inside = cv2.pointPolygonTest(contour, point, measureDist=False)
-            # 在轮廓内部
-            if is_inside == 1:
-                expanded_mask[y, x] = 255
-                print('(' + str(x) + ',' + str(y) + '),是轮廓中的点')
-    print('填充完毕')
-    return expanded_mask
+
 def borad_pz(expanded_mask, contour):
     cv2.drawContours(expanded_mask, [contour], -1, (255), thickness=cv2.FILLED)
     return expanded_mask
@@ -159,14 +182,16 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		threshold_image=im_read(face_mask)
-		qualified_Zuobiao, center_x, center_y,max_size = find_center_and_max_radius(threshold_image)
+		face_image=im_read(face_mask)
+		center_x, center_y,max_size = find_center_and_max_radius(face_image)
 		print(f'最小半径{max_size}')
+		image_size = (face_image.shape[0], face_image.shape[1])  # 图像尺寸
+		expanded_mask_copy = draw_irregular_shape_with_cv2(center_x, center_y, max_size+50, max_size+100, image_size)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 400
-		expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
-		expanded_mask_copy = borad_pz(expanded_mask, contours)
+		# expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
+		# expanded_mask_copy = borad_pz(expanded_mask, contours)
 		body=im_read(body_mask)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
