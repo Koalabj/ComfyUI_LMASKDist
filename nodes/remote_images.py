@@ -132,10 +132,10 @@ class LoadImageUrl:
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
-		img_face_expect_body = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
-		torch_img = torch.from_numpy(img_face_expect_body)
+		reult = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
+		torch_img = torch.from_numpy(reult)
 
-		torch_img=torch_img.permute(2, 0, 1)
+		torch_img=torch_img.permute(2, 0, 1).cpu().numpy()
 		return (torch_img,)
 
 
