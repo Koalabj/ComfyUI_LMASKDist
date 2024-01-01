@@ -60,6 +60,30 @@ def Direction_face_ZuoBiao(threshold):
         size=center_y-int(topmost[1])
 
     return contours_squeeze, center_x, center_y,size
+def find_center_and_max_radius(mask):
+    """
+    从黑白蒙版图中找到白色区域的中心点和最大半径。
+
+    :param mask: 黑白蒙版图，白色区域为感兴趣的区域
+    :return: 中心点坐标 (x, y) 和最大半径
+    """
+    # 找到白色区域的轮廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    max_contour = max(contours, key=cv2.contourArea)
+    contours_squeeze = max_contour.squeeze()
+
+    # 初始化最大半径和中心点
+    max_radius = 0
+    center_x, center_y = 0, 0
+
+    # 遍历所有轮廓，找到最大半径的圆
+    for contour in contours:
+        (x, y), radius = cv2.minEnclosingCircle(contour)
+        if radius > max_radius:
+            max_radius = radius
+            center_x, center_y = x, y
+
+    return contours_squeeze,(int(center_x), int(center_y)), int(max_radius)
 def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x, center_y):
     # 如何区别上左右轮廓的点呢？ 计算到中心点坐标的xy坐标值      contours[y, x]
     for i in range(len(qualified_Zuobiao)):
@@ -136,7 +160,7 @@ class LoadImageUrl:
 
 	def load_image_url(self, face_mask,body_mask):
 		threshold_image=im_read(face_mask)
-		qualified_Zuobiao, center_x, center_y,max_size = Direction_face_ZuoBiao(threshold_image)
+		qualified_Zuobiao, center_x, center_y,max_size = find_center_and_max_radius(threshold_image)
 		print(f'最小半径{max_size}')
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
