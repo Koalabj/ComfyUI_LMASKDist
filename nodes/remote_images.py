@@ -195,7 +195,15 @@ class LoadImageUrl:
 		body=im_read(body_mask)
 		width = body.shape[0]; height = body.shape[1]
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
-		img_face_expect_body = cv2.multiply(im1_copy, body)
+          
+		if expanded_mask_copy.shape[:2] != body.shape[:2]:
+			body=cv2.resize(body, (expanded_mask_copy.shape[1], expanded_mask_copy.shape[0]))
+		if len(expanded_mask_copy.shape) == 2:
+			expanded_mask_copy = cv2.cvtColor(expanded_mask_copy, cv2.COLOR_GRAY2BGR)
+		if len(body.shape) == 2:
+			body = cv2.cvtColor(body, cv2.COLOR_GRAY2BGR)
+
+		img_face_expect_body = cv2.multiply(expanded_mask_copy, body)
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		pil_image.save("/root/autodl-tmp/ComfyUI/output/test.png")
