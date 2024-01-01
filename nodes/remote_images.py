@@ -102,11 +102,11 @@ def draw_irregular_shape_with_cv2(center_x, center_y, min_radius, max_radius, im
     # 生成随机多边形的顶点
     num_points = random.randint(5, 10)  # 随机选择 5 到 10 个顶点
     points = []
-    for _ in range(num_points):
-        angle = random.uniform(0, 2 * math.pi)  # 随机角度
-        r = random.uniform(min_radius, max_radius)  # 随机半径
-        x = int(center_x + r * math.cos(angle))
-        y = int(center_y + r * math.sin(angle))
+    for i in range(num_points):
+        angle = 2 * np.pi * i / num_points
+        radius = random.uniform(min_radius, max_radius)
+        x = int(center_x + radius * np.cos(angle))
+        y = int(center_y + radius * np.sin(angle))
         points.append([x, y])
 
     # 将点转换为适合OpenCV的格式
