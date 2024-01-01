@@ -63,8 +63,8 @@ def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x
     # 如何区别上左右轮廓的点呢？ 计算到中心点坐标的xy坐标值      contours[y, x]
     for i in range(len(qualified_Zuobiao)):
         # 随机数生成
-        top_button_num = random.randint(100, vertical_num)
-        left_right_rand_num = random.randint(vertical_num, horizon_num)
+        top_button_num = random.randint(200, vertical_num)
+        left_right_rand_num = random.randint(200, horizon_num)
         # 区分左右脸
         if qualified_Zuobiao[i][0] <= center_x and qualified_Zuobiao[i][1] <= center_y: # 左上脸
             # 更改坐标点值
@@ -138,7 +138,7 @@ class LoadImageUrl:
 		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold_image)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
-		Vertical_num = 200
+		Vertical_num = 400
 		expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		expanded_mask_copy = borad_pz(expanded_mask, contours)
 		body=im_read(body_mask)
