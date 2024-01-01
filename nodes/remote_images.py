@@ -133,6 +133,8 @@ class LoadImageUrl:
 		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
 		img_face_expect_body = cv2.multiply(im1_copy, body)
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
+		pil_image = Image.fromarray(result)
+		pil_image.save("autodl-tmp/ComfyUI/output/test.png")
 		torch_img = torch.from_numpy(result).float() / 255.0
 		torch_img=torch_img.permute(2, 0, 1)
         # 转换为PyTorch张量
