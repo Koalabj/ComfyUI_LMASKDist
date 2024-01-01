@@ -136,7 +136,7 @@ class LoadImageUrl:
 		torch_img = torch.from_numpy(result).float() / 255.0
 		torch_img=torch_img.permute(2, 0, 1)
         # 转换为PyTorch张量
-		return torch_img
+		return (torch_img,)
 
 
 
