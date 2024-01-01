@@ -135,7 +135,8 @@ class LoadImageUrl:
 		reult = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		torch_img = torch.from_numpy(reult)
 
-		torch_img=torch_img.permute(2, 0, 1).cpu().numpy()
+		torch_img=torch_img.permute(2, 0, 1)
+		torch_img = torch_img.float() / 255.0
 		return (torch_img,)
 
 
