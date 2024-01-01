@@ -57,7 +57,7 @@ def Direction_face_ZuoBiao(threshold):
         # 计算蒙版图的中心点
         center_x = int((leftmost[0] + rightmost[0]) / 2)
         center_y = int((topmost[1] + buttonmost[1]) / 2)
-        size=center_y-topmost
+        size=center_y-int(topmost)
 
     return contours_squeeze, center_x, center_y,size
 def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x, center_y):
