@@ -69,16 +69,16 @@ def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x
         if qualified_Zuobiao[i][0] <= center_x and qualified_Zuobiao[i][1] <= center_y: # 左上脸
             # 更改坐标点值
             qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - random.randint(150,300) # x
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(1,150) # y
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(1,50) # y
         if qualified_Zuobiao[i][0] >= center_x and qualified_Zuobiao[i][1] <= center_y: # 右上脸
             qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + random.randint(150,300)
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(1,150)
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(1,50)
         if qualified_Zuobiao[i][0] <= center_x and qualified_Zuobiao[i][1] >= center_y:  # 左下脸
             qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - random.randint(150,300) # x
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(1,150) # y
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(1,50) # y
         if qualified_Zuobiao[i][0] >= center_x and qualified_Zuobiao[i][1] >= center_y:  # 右下脸
             qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + random.randint(150,300)
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(1,150)
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(1,50)
 
     points = np.array(qualified_Zuobiao)
     contours_a = np.array([points])
