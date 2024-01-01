@@ -83,7 +83,7 @@ def find_center_and_max_radius(mask):
             max_radius = radius
             center_x, center_y = x, y
 
-    return (int(center_x), int(center_y)), int(max_radius)
+    return int(center_x), int(center_y), int(max_radius)
 
 def draw_irregular_shape_with_cv2(center_x, center_y, min_radius, max_radius, image_size):
     """
