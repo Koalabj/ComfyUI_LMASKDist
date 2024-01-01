@@ -63,22 +63,22 @@ def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x
     # 如何区别上左右轮廓的点呢？ 计算到中心点坐标的xy坐标值      contours[y, x]
     for i in range(len(qualified_Zuobiao)):
         # 随机数生成
-        top_button_num = random.randint(1, vertical_num)
-        left_right_rand_num = random.randint(vertical_num, horizon_num)
+        # top_button_num = random.randint(1, vertical_num)
+        # left_right_rand_num = random.randint(vertical_num, horizon_num)
         # 区分左右脸
         if qualified_Zuobiao[i][0] <= center_x and qualified_Zuobiao[i][1] <= center_y: # 左上脸
             # 更改坐标点值
-            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - left_right_rand_num # x
+            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - random.randint(150,300) # x
             qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(150,300) # y
         if qualified_Zuobiao[i][0] >= center_x and qualified_Zuobiao[i][1] <= center_y: # 右上脸
-            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + left_right_rand_num
+            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + random.randint(150,300)
             qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] - random.randint(150,300)
         if qualified_Zuobiao[i][0] <= center_x and qualified_Zuobiao[i][1] >= center_y:  # 左下脸
-            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - left_right_rand_num # x
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + top_button_num # y
+            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] - random.randint(150,300) # x
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(150,300) # y
         if qualified_Zuobiao[i][0] >= center_x and qualified_Zuobiao[i][1] >= center_y:  # 右下脸
-            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + left_right_rand_num
-            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + top_button_num
+            qualified_Zuobiao[i][0] = qualified_Zuobiao[i][0] + random.randint(150,300)
+            qualified_Zuobiao[i][1] = qualified_Zuobiao[i][1] + random.randint(150,300)
 
     points = np.array(qualified_Zuobiao)
     contours_a = np.array([points])
