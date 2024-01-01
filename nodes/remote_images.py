@@ -9,7 +9,20 @@ from base64 import b64encode
 from io import BytesIO
 import cv2
 import random
+def pil_to_tensor_grayscale(pil_image):
+    # 将PIL图像转换为NumPy数组
+    numpy_image = np.array(pil_image)
 
+    # 归一化像素值
+    numpy_image = numpy_image.astype(np.float32) / 255.0
+
+    # 添加一个通道维度 [H, W] -> [1, H, W]
+    numpy_image = np.expand_dims(numpy_image, axis=0)
+
+    # 将NumPy数组转换为PyTorch张量
+    tensor_image = torch.from_numpy(numpy_image)
+
+    return tensor_image
 #处理为灰度图
 def im_read(face_mask):
 	numpy_image=face_mask.cpu().numpy()  
@@ -135,8 +148,7 @@ class LoadImageUrl:
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		pil_image.save("/root/autodl-tmp/ComfyUI/output/test.png")
-		torch_img = torch.from_numpy(result).float() / 255.0
-		torch_img=torch_img.permute(2, 0, 1)
+		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
 		return (torch_img,)
 
