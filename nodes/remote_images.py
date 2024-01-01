@@ -57,8 +57,9 @@ def Direction_face_ZuoBiao(threshold):
         # 计算蒙版图的中心点
         center_x = int((leftmost[0] + rightmost[0]) / 2)
         center_y = int((topmost[1] + buttonmost[1]) / 2)
+        size=center_y-topmost
 
-    return contours_squeeze, center_x, center_y
+    return contours_squeeze, center_x, center_y,size
 def Borad_draw(threshold, qualified_Zuobiao, horizon_num, vertical_num, center_x, center_y):
     # 如何区别上左右轮廓的点呢？ 计算到中心点坐标的xy坐标值      contours[y, x]
     for i in range(len(qualified_Zuobiao)):
@@ -135,7 +136,8 @@ class LoadImageUrl:
 
 	def load_image_url(self, face_mask,body_mask):
 		threshold_image=im_read(face_mask)
-		qualified_Zuobiao, center_x, center_y = Direction_face_ZuoBiao(threshold_image)
+		qualified_Zuobiao, center_x, center_y,max_size = Direction_face_ZuoBiao(threshold_image)
+		print(f'最小半径{max_size}')
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 400
