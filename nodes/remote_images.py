@@ -185,7 +185,7 @@ class LoadImageUrl:
 		face_image=im_read(face_mask)
 		center_x, center_y,max_size = find_center_and_max_radius(face_image)
 		print(f'最小半径{max_size}')
-		image_size = (face_image.shape[0], face_image.shape[1])  # 图像尺寸
+		image_size = (face_image.shape[1], face_image.shape[0])  # 图像尺寸
 		expanded_mask_copy = draw_irregular_shape_with_cv2(center_x, center_y, max_size+50, max_size+100, image_size)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
