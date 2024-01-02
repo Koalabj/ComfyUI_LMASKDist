@@ -12,6 +12,8 @@ import random
 import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
+from torchvision import transforms
+
 
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
@@ -231,14 +233,10 @@ class BodyMask:
 	CATEGORY = "remote"
 	def BodyMaskMake(self,image):
         # 保存图片
-		if len(image.shape) == 4 and image.shape[0] == 1:  # [1, C, H, W]
-			image = image.squeeze(0)
-		if image.shape[0] > 3:  # 如果通道数超过3，仅使用前三个通道
-			image = image[:3, :, :]
-		to_pil = ToPILImage()
-		img = to_pil(image)
+		toPIL = transforms.ToPILImage()
+		pic = toPIL(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
-		img.save(path)
+		pic.save(path)
 		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
 		# model.eval()
 		results = model(source=path, mode='val')
@@ -257,6 +255,7 @@ class BodyMask:
 			print('人体填充完毕')
 		else:
 			print('未检测到物体，固未填充')
+		
 		pil_image = Image.fromarray(person_img_mask)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
