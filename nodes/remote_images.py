@@ -14,23 +14,21 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
-def keep_top_20_percent(image):
+def blacken_below_y(image, y_coord):
     """
-    保留蒙版图中白色部分的上面 20%，其余部分变为黑色。
+    将图像中y坐标以下的所有非黑色部分变为黑色。
 
-    :param image: 输入的黑白蒙版图
+    :param image: 输入的黑白蒙版图，应为灰度图像
+    :param y_coord: 给定的y坐标
     :return: 修改后的图像
     """
-    # 计算需要保留的部分的高度
-    height_to_keep = int(image.shape[0] * 0.2)
+    # 确保y坐标在图像高度范围内
+    y_coord = max(0, min(y_coord, image.shape[0] - 1))
 
-    # 创建一个新的全黑图像
-    new_image = np.zeros_like(image)
+    # 将y坐标以下的区域变为黑色
+    image[y_coord:, :] = 0
 
-    # 将原图像的上面 20% 复制到新图像中
-    new_image[:height_to_keep, :] = image[:height_to_keep, :]
-
-    return new_image
+    return image
 
 def blacken_above_y(image, y_coord):
     # 确保y坐标在图像高度范围内
@@ -269,12 +267,14 @@ class BodyMask:
 	CATEGORY = "remote"
 	def BodyMaskMake(self,image,body_mask):
 		body=im_read(body_mask)
-		body20=keep_top_20_percent(body)
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
 
-		bootm=getMaskBootm(body20)
+		hight=body.shape[0]
+		print(f"图片高度{hight}")
+		bootm=(hight-top)*2/10+top
 		print(f"底部坐标{bootm}")
+		body20=getMaskBootm(body)
 
         # 保存图片
 		pic=tensor_to_pil(image)
