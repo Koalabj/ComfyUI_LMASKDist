@@ -9,11 +9,11 @@ def remote_images():
 	from .nodes.remote_images import LoadImageUrl,BodyMask
 	NODE_CLASS_MAPPINGS.update({
 		"LMASKImage": LoadImageUrl,
-		"BodyMask":BodyMask
+		"BodyMask":BodyMask,
 	})
 	NODE_DISPLAY_NAME_MAPPINGS.update({
 		"LMASKImage": "LMASKImage",
-		"BodyMask":BodyMask
+		"BodyMask":"BodyMask",
 	})
 
 
