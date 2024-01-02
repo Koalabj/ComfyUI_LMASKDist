@@ -10,7 +10,7 @@ from io import BytesIO
 import cv2
 import random
 import math
-
+from ultralytics import YOLO
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
     numpy_image = np.array(pil_image)
@@ -210,7 +210,37 @@ class LoadImageUrl:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
 		return (torch_img,)
+class BodyMask:
+	def __init__(self):
+		pass
+	@classmethod
+	def INPUT_TYPES(s):
+		return {
+			"required": {
+				"image": ("IMAGE",)
+			},
+            "optional": {
+                "image": ("IMAGE",)
+            }
+		}
 
+	RETURN_TYPES = ("IMAGE",)
+	FUNCTION = "BodyMaskMake"
+	CATEGORY = "remote"
+	def BodyMaskMake(self,image):
+		if len(image.shape) == 3:
+			image = image.unsqueeze(0)
+		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
+		model.eval()
+		with torch.no_grad():
+			results = model(image)
+		# 测试 将结果解析为pil图片
+		results = results.squeeze(0)  # 移除批次维度
+		pil_image = transforms.ToPILImage()(results)
+		torch_img=pil_to_tensor_grayscale(pil_image)
+		return (torch_img,)
+		
+		
 
 
 
