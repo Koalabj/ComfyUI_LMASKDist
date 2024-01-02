@@ -292,7 +292,7 @@ class BodyMask:
 		for r in results:
 			hair_zuobiao_masks = r.masks
         	# 把检测到的所有边界框的四个坐标拿出来
-			bbox_zuobiao = r.boxes.xyxy.numpy()
+			bbox_zuobiao = r.boxes.xyxy.cpu().numpy()
 		left_top_zuobiao = bbox_zuobiao[:, 1]
 		max_index = np.argmin(left_top_zuobiao)
 		max_value = left_top_zuobiao[max_index]
