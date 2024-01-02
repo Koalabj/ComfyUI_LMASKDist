@@ -231,7 +231,8 @@ class BodyMask:
 		image=im_read(image)
 		torch.zeros(1, requires_grad=True)
 		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
-		model.eval()
+		# model.eval()
+		results = model(source="/root/autodl-tmp/ComfyUI/input/012.jpg", mode='val')
 		# with torch.no_grad():
 		# 	results = model(image)
 		# # 测试 将结果解析为pil图片
