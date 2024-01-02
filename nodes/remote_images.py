@@ -260,7 +260,7 @@ class BodyMask:
 		else:
 			print('未检测到物体，固未填充')
 		
-		pil_image = Image.fromarray(np.uint8(person_img_mask))
+		pil_image = Image.fromarray(np.uint8(person_img_mask[0]))
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
