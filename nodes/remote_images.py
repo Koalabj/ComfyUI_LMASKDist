@@ -215,7 +215,6 @@ class LoadImageUrl:
 		img_face_expect_body = cv2.multiply(expanded_mask_copy, body)
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
-		pil_image.save("/root/autodl-tmp/ComfyUI/output/test.png")
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
 		return (torch_img,)
@@ -311,7 +310,12 @@ class BodyMask:
 		else:
 			print('未检测到物体，固未填充')
 
-		pil_image = Image.fromarray(np.uint8(hair_img_mask[0]))
+		# 头发+脸部的蒙版
+		hair_face_img = cv2.add(hair_img_mask, face_img_mask)
+
+
+		result = cv2.cvtColor(hair_face_img, cv2.COLOR_BGR2RGB)
+		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
