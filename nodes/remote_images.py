@@ -14,6 +14,24 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
+def keep_top_20_percent(image):
+    """
+    保留蒙版图中白色部分的上面 20%，其余部分变为黑色。
+
+    :param image: 输入的黑白蒙版图
+    :return: 修改后的图像
+    """
+    # 计算需要保留的部分的高度
+    height_to_keep = int(image.shape[0] * 0.2)
+
+    # 创建一个新的全黑图像
+    new_image = np.zeros_like(image)
+
+    # 将原图像的上面 20% 复制到新图像中
+    new_image[:height_to_keep, :] = image[:height_to_keep, :]
+
+    return new_image
+
 def blacken_above_y(image, y_coord):
     # 确保y坐标在图像高度范围内
 		y_coord = max(0, min(y_coord, image.shape[0]))
@@ -57,7 +75,12 @@ def im_read(face_mask):
 		threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
 	threshold_image = np.uint8(threshold_image)
 	return threshold_image
-    
+def getMaskBootm(threshold):
+	contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	for contour in contours:
+		buttonmost = tuple(contour[contour[:, :, 1].argmax()][0])
+	return  buttonmost[1]
+
 def getMaskTop(threshold):
     # 轮廓检测
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -246,8 +269,13 @@ class BodyMask:
 	CATEGORY = "remote"
 	def BodyMaskMake(self,image,body_mask):
 		body=im_read(body_mask)
+		body20=keep_top_20_percent(body)
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
+
+		bootm=getMaskBootm(body20)
+		print(f"底部坐标{bootm}")
+
         # 保存图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
