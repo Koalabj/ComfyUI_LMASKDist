@@ -70,7 +70,7 @@ def getMaskTop(threshold):
         # center_y = int((topmost[1] + buttonmost[1]) / 2)
         # size=center_y-int(topmost[1])
 
-    return  topmost
+    return  topmost[1]
 def find_center_and_max_radius(mask):
     """
     从黑白蒙版图中找到白色区域的中心点和最大半径。
@@ -336,6 +336,15 @@ class BodyMask:
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
+	
+	def blacken_above_y(image, y_coord):
+    # 确保y坐标在图像高度范围内
+		y_coord = max(0, min(y_coord, image.shape[0]))
+
+    # 将y坐标以上的区域变为黑色
+		image[:y_coord, :] = 0
+
+		return image
 		
 		
 
