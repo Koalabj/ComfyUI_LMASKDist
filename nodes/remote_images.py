@@ -233,6 +233,8 @@ class BodyMask:
         # 保存图片
 		if len(image.shape) == 4 and image.shape[0] == 1:  # [1, C, H, W]
 			image = image.squeeze(0)
+		if image.shape[0] > 3:  # 如果通道数超过3，仅使用前三个通道
+			image = image[:3, :, :]
 		to_pil = ToPILImage()
 		img = to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
