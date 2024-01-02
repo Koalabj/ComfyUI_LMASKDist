@@ -384,7 +384,7 @@ class BodyMask:
 		final_img20=blacken_below_y(final_img,bootm)
 		rs=create_mask_from_contours(final_img20,body20)
 		final_img=cv2.subtract(final_img,rs)
-		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(rs, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
