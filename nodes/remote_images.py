@@ -14,6 +14,14 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
+def blacken_above_y(image, y_coord):
+    # 确保y坐标在图像高度范围内
+		y_coord = max(0, min(y_coord, image.shape[0]))
+
+    # 将y坐标以上的区域变为黑色
+		image[:y_coord, :] = 0
+
+		return image
 def tensor_to_pil(img_tensor, batch_index=0):
     # Convert tensor of shape [batch_size, channels, height, width] at the batch_index to PIL Image
     img_tensor = img_tensor[batch_index].unsqueeze(0)
@@ -324,27 +332,15 @@ class BodyMask:
 		
 		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
-		erosion_kernel = np.ones((100, 100), np.uint8)
-		dilation_kernel = np.ones((100, 100), np.uint8)
+		final_img=blacken_above_y(final_img,top)
 
-    	# 先腐蚀后膨胀
-		eroded = cv2.erode(final_img, erosion_kernel, iterations=1)
-		dilated = cv2.dilate(eroded, dilation_kernel, iterations=1)	
-
-		result = cv2.cvtColor(dilated, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
 	
-	def blacken_above_y(image, y_coord):
-    # 确保y坐标在图像高度范围内
-		y_coord = max(0, min(y_coord, image.shape[0]))
-
-    # 将y坐标以上的区域变为黑色
-		image[:y_coord, :] = 0
-
-		return image
+	
 		
 		
 
