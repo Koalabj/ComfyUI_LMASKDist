@@ -241,14 +241,19 @@ class BodyMask:
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
 		pic.save(path)
-		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
+
+		original_img = cv2.imread(path)
+		gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+		_, img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+
+		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8n-seg.pt')
 		# model.eval()
 		results = model(source=path, mode='val')
 		# # 测试 将结果解析为pil图片
 		#  # View results
 		for r in results:
 			person_zuobiao_masks = r.masks
-		person_img_mask = np.ones_like(image)
+		person_img_mask = np.ones_like(img)
 		if person_zuobiao_masks != None:
 			person_zuobiao = person_zuobiao_masks.xy
 			for item in person_zuobiao:
@@ -260,7 +265,29 @@ class BodyMask:
 		else:
 			print('未检测到物体，固未填充')
 		
-		pil_image = Image.fromarray(np.uint8(person_img_mask[0]))
+		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/face_yolov8m-seg_60.pt')
+    	# Run inference on an image
+		results = model(source=path, mode='val')  # results list
+    	# View results
+		for r in results:
+			face_zuobiao_masks = r.masks
+
+		face_img_mask = np.ones_like(img)
+		if face_zuobiao_masks != None:
+        # 找出每个检测框
+			face_zuobiao = face_zuobiao_masks.xy
+			for item in face_zuobiao:
+				points = np.array(item, dtype=np.int32)
+				# 将轮廓列表转换为多维数组格式
+				contours_a = np.array([points])
+			cv2.fillPoly(face_img_mask, contours_a, (255, 255, 255))
+            # 找到脸部的最低端坐标(找到 y 轴坐标最大的坐标点)
+			max_y_coordinate_face = item[np.argmax(item[:, 1])]
+			print('人脸填充完毕')	
+		else:
+			print('未检测到物体，固未填充')
+		
+		pil_image = Image.fromarray(np.uint8(max_y_coordinate_face[0]))
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
