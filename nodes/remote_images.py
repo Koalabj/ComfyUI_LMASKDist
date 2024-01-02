@@ -288,8 +288,30 @@ class BodyMask:
 			print('未检测到物体，固未填充')
 		
 
+		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/best_hair_117_epoch_v4.pt')
+		results = model(source=path, mode='val')  # results list
+		for r in results:
+			hair_zuobiao_masks = r.masks
+        	# 把检测到的所有边界框的四个坐标拿出来
+			bbox_zuobiao = r.boxes.xyxy.numpy()
+		left_top_zuobiao = bbox_zuobiao[:, 1]
+		max_index = np.argmin(left_top_zuobiao)
+		max_value = left_top_zuobiao[max_index]
+		hair_img_mask = np.zeros_like(img)
+		if hair_zuobiao_masks != None:
+			hair_zuobiao = hair_zuobiao_masks.xy
+			item = hair_zuobiao[max_index]
+			points = np.array(item, dtype=np.int32)
+        	# 将轮廓列表转换为多维数组格式
+			contours_a = np.array([points])
+			cv2.fillPoly(hair_img_mask, contours_a, (255, 255, 255))
+			# 找到头发的最低端坐标
+			max_y_coordinate_hair = item[np.argmax(item[:, 1])]
+			print('头发填充完毕')
+		else:
+			print('未检测到物体，固未填充')
 
-		pil_image = Image.fromarray(np.uint8(face_img_mask[0]))
+		pil_image = Image.fromarray(np.uint8(hair_img_mask[0]))
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
