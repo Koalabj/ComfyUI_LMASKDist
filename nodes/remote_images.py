@@ -50,27 +50,27 @@ def im_read(face_mask):
 	threshold_image = np.uint8(threshold_image)
 	return threshold_image
     
-def Direction_face_ZuoBiao(threshold):
+def getMaskTop(threshold):
     # 轮廓检测
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # 提取每个轮廓的点坐标
-    max_contour = max(contours, key=cv2.contourArea)
-    contours_squeeze = max_contour.squeeze()
+    # max_contour = max(contours, key=cv2.contourArea)
+    # contours_squeeze = max_contour.squeeze()
 
     for contour in contours:
         # 找到轮廓的上、左、右边界 (index) (641,305)
-        leftmost = tuple(contour[contour[:, :, 0].argmin()][0])
-        rightmost = tuple(contour[contour[:, :, 0].argmax()][0])
+        # leftmost = tuple(contour[contour[:, :, 0].argmin()][0])
+        # rightmost = tuple(contour[contour[:, :, 0].argmax()][0])
         topmost = tuple(contour[contour[:, :, 1].argmin()][0]) # (Y, X)
-        buttonmost = tuple(contour[contour[:, :, 1].argmax()][0])
+        # buttonmost = tuple(contour[contour[:, :, 1].argmax()][0])
 
         # 计算蒙版图的中心点
-        center_x = int((leftmost[0] + rightmost[0]) / 2)
-        center_y = int((topmost[1] + buttonmost[1]) / 2)
-        size=center_y-int(topmost[1])
+        # center_x = int((leftmost[0] + rightmost[0]) / 2)
+        # center_y = int((topmost[1] + buttonmost[1]) / 2)
+        # size=center_y-int(topmost[1])
 
-    return contours_squeeze, center_x, center_y,size
+    return  topmost
 def find_center_and_max_radius(mask):
     """
     从黑白蒙版图中找到白色区域的中心点和最大半径。
@@ -225,7 +225,8 @@ class BodyMask:
 	def INPUT_TYPES(s):
 		return {
 			"required": {
-				"image": ("IMAGE",)
+				"image": ("IMAGE",),
+				"body_mask": ("IMAGE",)
 			},
             "optional": {
                 "image": ("IMAGE",)
@@ -235,7 +236,10 @@ class BodyMask:
 	RETURN_TYPES = ("IMAGE",)
 	FUNCTION = "BodyMaskMake"
 	CATEGORY = "remote"
-	def BodyMaskMake(self,image):
+	def BodyMaskMake(self,image,body_mask):
+		body=im_read(body_mask)
+		top=getMaskTop(body)
+		print(f"顶部坐标{top}")
         # 保存图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
