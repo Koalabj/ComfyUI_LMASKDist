@@ -292,7 +292,7 @@ class BodyMask:
 
 		hight=body.shape[0]
 		print(f"图片高度{hight}")
-		bootm=(hight-top)*2/10+top
+		bootm=int((hight-top)*2/10+top)
 		print(f"底部坐标{bootm}")
 		body20=blacken_below_y(body,bootm)
 
