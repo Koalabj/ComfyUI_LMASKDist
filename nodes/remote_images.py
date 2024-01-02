@@ -13,7 +13,27 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
+def create_mask_from_contours(mask1, mask2):
+    """
+    创建一个新的蒙版，保留mask1中不在mask2的白色轮廓范围内的部分。
 
+    :param mask1: 第一个黑白蒙版图
+    :param mask2: 第二个黑白蒙版图
+    :return: 新的蒙版图
+    """
+    # 在mask2中找到白色轮廓
+    contours, _ = cv2.findContours(mask2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 创建一个与mask1大小相同的全黑图像
+    new_mask = np.zeros_like(mask1)
+
+    # 将mask2的轮廓填充为白色
+    cv2.drawContours(new_mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    # 保留mask1中不在mask2轮廓范围内的部分
+    result_mask = cv2.bitwise_and(mask1, cv2.bitwise_not(new_mask))
+
+    return result_mask
 def blacken_below_y(image, y_coord):
     """
     将图像中y坐标以下的所有非黑色部分变为黑色。
@@ -360,8 +380,10 @@ class BodyMask:
 		
 		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
-		final_img=blacken_above_y(final_img,top)
-
+		# final_img=blacken_above_y(final_img,top)
+		final_img20=blacken_below_y(final_img)
+		rs=create_mask_from_contours(final_img20,body20)
+		final_img=cv2.subtract(final_img,rs)
 		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
