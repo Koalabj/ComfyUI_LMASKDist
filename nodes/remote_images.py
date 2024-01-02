@@ -384,7 +384,7 @@ class BodyMask:
 		final_img1=np.copy(final_img)
 		final_img20=blacken_below_y(final_img1,bootm)
 		rs=create_mask_from_contours(final_img20,body20)
-		rs=blacken_below_y(rs,top)
+		# rs=blacken_below_y(rs,top)
 
 		final=cv2.subtract(final_img,rs)
 		result = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
