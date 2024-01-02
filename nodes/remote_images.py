@@ -229,6 +229,7 @@ class BodyMask:
 	CATEGORY = "remote"
 	def BodyMaskMake(self,image):
 		image=im_read(image)
+		torch.zeros(1, requires_grad=True)
 		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
 		model.eval()
 		# with torch.no_grad():
