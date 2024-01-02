@@ -313,12 +313,12 @@ class BodyMask:
 		# 头发+脸部的蒙版
 		hair_face_img = cv2.add(hair_img_mask, face_img_mask)
 
-		if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
-			button_zuobiao = max_y_coordinate_face
-		else:
-			buttton_zuobiao = max_y_coordinate_hair
+		# if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
+		# 	button_zuobiao = max_y_coordinate_face
+		# else:
+		# 	buttton_zuobiao = max_y_coordinate_hair
 		
-		hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
+		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
 
 		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
