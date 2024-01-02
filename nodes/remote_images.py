@@ -381,7 +381,8 @@ class BodyMask:
 		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
 		# final_img=blacken_above_y(final_img,top)
-		final_img20=blacken_below_y(final_img,bootm)
+		final_img1=np.copy(final_img)
+		final_img20=blacken_below_y(final_img1,bootm)
 		rs=create_mask_from_contours(final_img20,body20)
 		rs=blacken_below_y(rs,top)
 
