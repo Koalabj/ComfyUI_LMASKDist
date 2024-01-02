@@ -231,24 +231,24 @@ class BodyMask:
 		image=im_read(image)
 		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt')
 		model.eval()
-		with torch.no_grad():
-			results = model(image)
-		# 测试 将结果解析为pil图片
-		 # View results
-		for r in results:
-			person_zuobiao_masks = r.masks
-		person_img_mask = np.ones_like(image)
-		if person_zuobiao_masks != None:
-			person_zuobiao = person_zuobiao_masks.xy
-			for item in person_zuobiao:
-				points = np.array(item, dtype=np.int32)
-           		# 将轮廓列表转换为多维数组格式
-				contours_a = np.array([points])
-			cv2.fillPoly(person_img_mask, contours_a, (255, 255, 255))
-			print('人体填充完毕')
-		else:
-			print('未检测到物体，固未填充')
-		pil_image = Image.fromarray(person_img_mask)
+		# with torch.no_grad():
+		# 	results = model(image)
+		# # 测试 将结果解析为pil图片
+		#  # View results
+		# for r in results:
+		# 	person_zuobiao_masks = r.masks
+		# person_img_mask = np.ones_like(image)
+		# if person_zuobiao_masks != None:
+		# 	person_zuobiao = person_zuobiao_masks.xy
+		# 	for item in person_zuobiao:
+		# 		points = np.array(item, dtype=np.int32)
+        #    		# 将轮廓列表转换为多维数组格式
+		# 		contours_a = np.array([points])
+		# 	cv2.fillPoly(person_img_mask, contours_a, (255, 255, 255))
+		# 	print('人体填充完毕')
+		# else:
+		# 	print('未检测到物体，固未填充')
+		pil_image = Image.fromarray(image)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
 		return (torch_img,)
