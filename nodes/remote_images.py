@@ -320,8 +320,14 @@ class BodyMask:
 		
 		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
+		erosion_kernel = np.ones((100, 100), np.uint8)
+		dilation_kernel = np.ones((100, 100), np.uint8)
 
-		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
+    	# 先腐蚀后膨胀
+		eroded = cv2.erode(final_img, erosion_kernel, iterations=1)
+		dilated = cv2.dilate(eroded, dilation_kernel, iterations=1)	
+
+		result = cv2.cvtColor(dilated, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
