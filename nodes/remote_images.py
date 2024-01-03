@@ -355,7 +355,7 @@ class BodyMask:
 			bbox_zuobiao = r.boxes.xyxy.cpu().numpy()
 		left_top_zuobiao = bbox_zuobiao[:, 1]
 		# 增加校验
-		if left_top_zuobiao==0:
+		if left_top_zuobiao is None or len(left_top_zuobiao) == 0:
 			print('未检测到物体，固未填充')
 		else:
 			max_index = np.argmin(left_top_zuobiao)
