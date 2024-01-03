@@ -394,7 +394,10 @@ class BodyMask:
 		# rs=blacken_below_y(rs,top)
 
 		final=cv2.subtract(final_img,rs)
-		result = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
+		# 反色处理
+		inverted_mask = cv2.bitwise_not(final)
+
+		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
