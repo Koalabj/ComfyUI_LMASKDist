@@ -346,7 +346,7 @@ class BodyMask:
 		else:
 			print('未检测到物体，固未填充')
 		
-
+		hair_img_mask = None
 		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/best_hair_117_epoch_v4.pt')
 		results = model(source=path, mode='val')  # results list
 		for r in results:
@@ -375,7 +375,10 @@ class BodyMask:
 				print('未检测到物体，固未填充')
 
 		# 头发+脸部的蒙版
-		hair_face_img = cv2.add(hair_img_mask, face_img_mask)
+		if hair_img_mask is not None:
+			hair_face_img = cv2.add(hair_img_mask, face_img_mask)
+		else:
+			hair_face_img=face_img_mask
 
 		# if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
 		# 	button_zuobiao = max_y_coordinate_face
