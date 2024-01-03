@@ -354,21 +354,25 @@ class BodyMask:
         	# 把检测到的所有边界框的四个坐标拿出来
 			bbox_zuobiao = r.boxes.xyxy.cpu().numpy()
 		left_top_zuobiao = bbox_zuobiao[:, 1]
-		max_index = np.argmin(left_top_zuobiao)
-		max_value = left_top_zuobiao[max_index]
-		hair_img_mask = np.zeros_like(img)
-		if hair_zuobiao_masks != None:
-			hair_zuobiao = hair_zuobiao_masks.xy
-			item = hair_zuobiao[max_index]
-			points = np.array(item, dtype=np.int32)
-        	# 将轮廓列表转换为多维数组格式
-			contours_a = np.array([points])
-			cv2.fillPoly(hair_img_mask, contours_a, (255, 255, 255))
-			# 找到头发的最低端坐标
-			max_y_coordinate_hair = item[np.argmax(item[:, 1])]
-			print('头发填充完毕')
-		else:
+		# 增加校验
+		if left_top_zuobiao==0:
 			print('未检测到物体，固未填充')
+		else:
+			max_index = np.argmin(left_top_zuobiao)
+			max_value = left_top_zuobiao[max_index]
+			hair_img_mask = np.zeros_like(img)
+			if hair_zuobiao_masks != None:
+				hair_zuobiao = hair_zuobiao_masks.xy
+				item = hair_zuobiao[max_index]
+				points = np.array(item, dtype=np.int32)
+        		# 将轮廓列表转换为多维数组格式
+				contours_a = np.array([points])
+				cv2.fillPoly(hair_img_mask, contours_a, (255, 255, 255))
+				# 找到头发的最低端坐标
+				max_y_coordinate_hair = item[np.argmax(item[:, 1])]
+				print('头发填充完毕')
+			else:
+				print('未检测到物体，固未填充')
 
 		# 头发+脸部的蒙版
 		hair_face_img = cv2.add(hair_img_mask, face_img_mask)
