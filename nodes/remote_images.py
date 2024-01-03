@@ -275,7 +275,8 @@ class BodyMask:
 		return {
 			"required": {
 				"image": ("IMAGE",),
-				"body_mask": ("IMAGE",)
+				"body_mask": ("IMAGE",),
+				"person_mask":("IMAGE",)
 			},
             "optional": {
                 "image": ("IMAGE",)
@@ -285,8 +286,9 @@ class BodyMask:
 	RETURN_TYPES = ("IMAGE",)
 	FUNCTION = "BodyMaskMake"
 	CATEGORY = "remote"
-	def BodyMaskMake(self,image,body_mask):
+	def BodyMaskMake(self,image,body_mask,person_mask):
 		body=im_read(body_mask)
+		person_img_mask=im_read(person_mask)
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
 
@@ -305,24 +307,24 @@ class BodyMask:
 		gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
 		_, img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
 
-		model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8n-seg.pt')
-		# model.eval()
-		results = model(source=path, mode='val')
-		# # 测试 将结果解析为pil图片
-		#  # View results
-		for r in results:
-			person_zuobiao_masks = r.masks
-		person_img_mask = np.ones_like(img)
-		if person_zuobiao_masks != None:
-			person_zuobiao = person_zuobiao_masks.xy
-			for item in person_zuobiao:
-				points = np.array(item, dtype=np.int32)
-           		# 将轮廓列表转换为多维数组格式
-				contours_a = np.array([points])
-			cv2.fillPoly(person_img_mask, contours_a, (255, 255, 255))
-			print('人体填充完毕')
-		else:
-			print('未检测到物体，固未填充')
+		# model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8n-seg.pt')
+		# # model.eval()
+		# results = model(source=path, mode='val')
+		# # # 测试 将结果解析为pil图片
+		# #  # View results
+		# for r in results:
+		# 	person_zuobiao_masks = r.masks
+		# person_img_mask = np.ones_like(img)
+		# if person_zuobiao_masks != None:
+		# 	person_zuobiao = person_zuobiao_masks.xy
+		# 	for item in person_zuobiao:
+		# 		points = np.array(item, dtype=np.int32)
+        #    		# 将轮廓列表转换为多维数组格式
+		# 		contours_a = np.array([points])
+		# 	cv2.fillPoly(person_img_mask, contours_a, (255, 255, 255))
+		# 	print('人体填充完毕')
+		# else:
+		# 	print('未检测到物体，固未填充')
 		
 		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/face_yolov8m-seg_60.pt')
     	# Run inference on an image
