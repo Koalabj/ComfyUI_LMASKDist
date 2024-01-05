@@ -23,21 +23,18 @@ def irregular_diffusion(mask, min_vertical_distance, min_horizontal_distance):
     :param min_horizontal_distance: 水平方向的扩散的最小距离
     :return: 扩散后的图像
     """
-    # 创建不规则的扩散核，水平方向宽，垂直方向窄
-    kernel = np.zeros((min_vertical_distance * 2 + 1, min_horizontal_distance * 2 + 1), np.uint8)
-    cv2.ellipse(kernel, (min_horizontal_distance, min_vertical_distance), (min_horizontal_distance, min_vertical_distance), 0, 0, 360, 1, -1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, 
+                                       (min_horizontal_distance * 2 + 1, min_vertical_distance * 2 + 1))
 
     # 进行膨胀操作
     dilated_mask = cv2.dilate(mask, kernel, iterations=1)
 
-    # 创建随机扩散效果
-    for i in range(mask.shape[0]):
-        for j in range(mask.shape[1]):
-            if mask[i, j] == 255 and dilated_mask[i, j] == 255:
-                if random.random() < 0.5:  # 随机决定是否保留膨胀像素
-                    dilated_mask[i, j] = mask[i, j]
+    # 生成随机矩阵并与膨胀后的图像进行比较，以创建不规则效果
+    random_mask = np.random.rand(*dilated_mask.shape) < 0.5
+    irregular_dilated = np.where(random_mask, dilated_mask, mask)
 
-    return dilated_mask
+    return irregular_dilated
+
 
 
 
