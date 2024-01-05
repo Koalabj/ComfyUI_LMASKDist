@@ -276,6 +276,9 @@ class LoadImageUrl:
 
 		print("随机完成")
 		body=im_read(body_mask)
+		# 反色
+		body = cv2.bitwise_not(body)
+
 		print("身体加载完成")          
 		if dilated_mask.shape[:2] != body.shape[:2]:
 			body=cv2.resize(body, (dilated_mask.shape[1], dilated_mask.shape[0]))
