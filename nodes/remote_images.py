@@ -256,7 +256,7 @@ class LoadImageUrl:
 				if face_image[i, j] == 255 and dilated_mask[i, j] == 255:
 					if random.random() < 0.5:  # 随机决定是否保留膨胀像素
 						dilated_mask[i, j] = face_image[i, j]
-		
+		print("膨胀完成")
 		body=im_read(body_mask)
 		# width = body.shape[0]; height = body.shape[1]
 
@@ -281,6 +281,7 @@ class LoadImageUrl:
 			body = cv2.cvtColor(body, cv2.COLOR_GRAY2BGR)
 
 		img_face_expect_body = cv2.multiply(dilated_mask, body)
+		print("替换完成")
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
