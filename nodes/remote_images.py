@@ -14,7 +14,7 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
-def create_smooth_bezier_polygon(mask_path):
+def create_smooth_bezier_polygon(mask):
 
     # 查找白色部分的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
