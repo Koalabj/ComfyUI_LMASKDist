@@ -269,8 +269,8 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		min_vertical_distance = 150
-		min_horizontal_distance = 400
+		min_vertical_distance = 250
+		min_horizontal_distance = 350
 		print("开始加载")
 		face_image=im_read(face_mask)
 		print("脸部加载")
