@@ -15,8 +15,6 @@ from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
 def create_smooth_bezier_polygon(mask_path):
-    # 读取蒙版图像
-    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
 
     # 查找白色部分的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
