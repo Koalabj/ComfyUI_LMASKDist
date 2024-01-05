@@ -241,7 +241,9 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
+		print("开始加载")
 		face_image=im_read(face_mask)
+		print("脸部加载")
 		min_vertical_distance=150
 		min_horizontal_distance=300
 		# 创建不规则的扩散核，水平方向宽，垂直方向窄
@@ -249,14 +251,14 @@ class LoadImageUrl:
 		cv2.ellipse(kernel, (min_horizontal_distance, min_vertical_distance), (min_horizontal_distance, min_vertical_distance), 0, 0, 360, 1, -1)
 		# 进行膨胀操作
 		dilated_mask = cv2.dilate(face_image, kernel, iterations=1)
-
+		print("膨胀完成")
     	# 创建随机扩散效果
 		for i in range(face_image.shape[0]):
 			for j in range(face_image.shape[1]):
 				if face_image[i, j] == 255 and dilated_mask[i, j] == 255:
 					if random.random() < 0.5:  # 随机决定是否保留膨胀像素
 						dilated_mask[i, j] = face_image[i, j]
-		print("膨胀完成")
+		print("随机完成")
 		body=im_read(body_mask)
 		# width = body.shape[0]; height = body.shape[1]
 
