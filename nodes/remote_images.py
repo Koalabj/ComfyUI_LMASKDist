@@ -216,6 +216,7 @@ def borad_pz(expanded_mask, contour):
     cv2.drawContours(expanded_mask, [contour], -1, (255), thickness=cv2.FILLED)
     return expanded_mask
 
+
 def pil_to_tensor(source_image):
     image = Image.fromarray(np.clip(255. * source_image.cpu().numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
     return image
@@ -241,27 +242,45 @@ class LoadImageUrl:
 
 	def load_image_url(self, face_mask,body_mask):
 		face_image=im_read(face_mask)
-		center_x, center_y,max_size = find_center_and_max_radius(face_image)
-		print(f'最小半径{max_size}')
-		image_size = (face_image.shape[1], face_image.shape[0])  # 图像尺寸
-		expanded_mask_copy = draw_irregular_shape_with_cv2(center_x, center_y, max_size+100, max_size+200, image_size)
+		min_vertical_distance=150
+		min_horizontal_distance=300
+		# 创建不规则的扩散核，水平方向宽，垂直方向窄
+		kernel = np.zeros((min_vertical_distance * 2 + 1, min_horizontal_distance * 2 + 1), np.uint8)
+		cv2.ellipse(kernel, (min_horizontal_distance, min_vertical_distance), (min_horizontal_distance, min_vertical_distance), 0, 0, 360, 1, -1)
+		# 进行膨胀操作
+		dilated_mask = cv2.dilate(face_image, kernel, iterations=1)
+
+    	# 创建随机扩散效果
+		for i in range(face_image.shape[0]):
+			for j in range(face_image.shape[1]):
+				if face_image[i, j] == 255 and dilated_mask[i, j] == 255:
+					if random.random() < 0.5:  # 随机决定是否保留膨胀像素
+						dilated_mask[i, j] = face_image[i, j]
+		
+		body=im_read(body_mask)
+		# width = body.shape[0]; height = body.shape[1]
+
+		# center_x, center_y,max_size = find_center_and_max_radius(face_image)
+		# print(f'最小半径{max_size}')
+		# image_size = (face_image.shape[1], face_image.shape[0])  # 图像尺寸
+		# expanded_mask_copy = draw_irregular_shape_with_cv2(center_x, center_y, max_size+100, max_size+200, image_size)
 		# 参数定义
 		Horizon_num = 300 # 坐标点扩散距离
 		Vertical_num = 400
 		# expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
 		# expanded_mask_copy = borad_pz(expanded_mask, contours)
-		body=im_read(body_mask)
-		width = body.shape[0]; height = body.shape[1]
-		im1_copy = cv2.resize(expanded_mask_copy, (height, width))
+		# body=im_read(body_mask)
+		# width = body.shape[0]; height = body.shape[1]
+		# im1_copy = cv2.resize(expanded_mask_copy, (height, width))
           
-		if expanded_mask_copy.shape[:2] != body.shape[:2]:
-			body=cv2.resize(body, (expanded_mask_copy.shape[1], expanded_mask_copy.shape[0]))
-		if len(expanded_mask_copy.shape) == 2:
-			expanded_mask_copy = cv2.cvtColor(expanded_mask_copy, cv2.COLOR_GRAY2BGR)
+		if dilated_mask.shape[:2] != body.shape[:2]:
+			body=cv2.resize(body, (dilated_mask.shape[1], dilated_mask.shape[0]))
+		if len(dilated_mask.shape) == 2:
+			dilated_mask = cv2.cvtColor(dilated_mask, cv2.COLOR_GRAY2BGR)
 		if len(body.shape) == 2:
 			body = cv2.cvtColor(body, cv2.COLOR_GRAY2BGR)
 
-		img_face_expect_body = cv2.multiply(expanded_mask_copy, body)
+		img_face_expect_body = cv2.multiply(dilated_mask, body)
 		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
