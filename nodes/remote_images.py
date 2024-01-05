@@ -302,7 +302,7 @@ class LoadImageUrl:
 
 		img_face_expect_body = cv2.multiply(dilated_mask, body)
 		print("替换完成")
-		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(dilated_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
