@@ -18,42 +18,33 @@ def create_smooth_bezier_polygon(mask):
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    if len(contours) == 0:
-        print("没有找到白色区域")
-        return None
+    # 创建一个新的蒙版用于绘制扩散后的白色区域
+    expanded_mask = np.zeros_like(mask)
 
-    # 随机选择一个轮廓
-    selected_contour = random.choice(contours)
+    for contour in contours:
+        # 获取轮廓的边界框
+        x, y, w, h = cv2.boundingRect(contour)
 
-    # 计算轮廓的中心坐标
-    M = cv2.moments(selected_contour)
-    center_x = int(M["m10"] / M["m00"])
-    center_y = int(M["m01"] / M["m00"])
+        # 计算扩散的倍数
+        horizontal_expansion = random.uniform(1, 1.5)
+        vertical_expansion = random.uniform(0.5, 1)
 
-    # 随机生成半径在1.5到2倍之间的倍数
-    radius_multiplier = random.uniform(1.5, 2.0)
+        # 计算扩散后的边界框
+        new_x = int(x - w * (horizontal_expansion - 1) / 2)
+        new_y = int(y - h * (vertical_expansion - 1) / 2)
+        new_w = int(w * horizontal_expansion)
+        new_h = int(h * vertical_expansion)
 
-    # 计算Bezier曲线的控制点
-    p0 = (center_x, center_y - int(radius_multiplier * center_y))
-    p1 = (center_x - int(radius_multiplier * center_x * 0.5), center_y)
-    p2 = (center_x + int(radius_multiplier * center_x * 0.5), center_y)
-    p3 = (center_x, center_y + int(radius_multiplier * center_y))
+        # 确保边界框不超出图像边界
+        new_x = max(0, new_x)
+        new_y = max(0, new_y)
+        new_w = min(mask.shape[1] - new_x, new_w)
+        new_h = min(mask.shape[0] - new_y, new_h)
 
-    # 生成Bezier曲线上的点
-    t = np.linspace(0, 1, 100)
-    x_curve = ((1 - t)**3) * p0[0] + 3 * ((1 - t)**2) * t * p1[0] + 3 * (1 - t) * (t**2) * p2[0] + (t**3) * p3[0]
-    y_curve = ((1 - t)**3) * p0[1] + 3 * ((1 - t)**2) * t * p1[1] + 3 * (1 - t) * (t**2) * p2[1] + (t**3) * p3[1]
+        # 在新蒙版上绘制扩散后的区域
+        expanded_mask[new_y:new_y+new_h, new_x:new_x+new_w] = 255
 
-    # 创建一个空白图像
-    polygon_image = np.zeros_like(mask)
-
-    # 生成多边形的顶点
-    polygon_points = [(int(x), int(y)) for x, y in zip(x_curve, y_curve)]
-
-    # 将多边形填充为白色
-    cv2.fillPoly(polygon_image, [np.array(polygon_points)], 255)
-     
-    return polygon_image
+    return expanded_mask
 
 
 
@@ -304,7 +295,7 @@ class LoadImageUrl:
 
 		img_face_expect_body = cv2.multiply(dilated_mask, body)
 		print("替换完成")
-		result = cv2.cvtColor(dilated_mask, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(img_face_expect_body, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
