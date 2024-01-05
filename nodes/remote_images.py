@@ -16,39 +16,35 @@ from torchvision import transforms
 
 def create_smooth_bezier_polygon(mask):
 
+    # 找到白色区域的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # 创建一个新的蒙版用于绘制扩散后的白色区域
-    expanded_mask = np.zeros_like(mask)
+    # 创建一个新的蒙版用于绘制半椭圆
+    ellipse_mask = np.zeros_like(mask)
 
     for contour in contours:
-        # 获取轮廓的边界框
+        # 计算轮廓的边界框
         x, y, w, h = cv2.boundingRect(contour)
 
-        # 计算扩散的倍数
-        horizontal_expansion = random.uniform(1, 1.5)
-        vertical_expansion = random.uniform(0.5, 1)
+        # 确定原始白色区域的最大半径
+        max_radius = max(w, h) / 2
 
-        # 计算扩散后的边界框
-        new_x = int(x - w * (horizontal_expansion - 1) / 2)
-        new_y = int(y - h * (vertical_expansion - 1) / 2)
-        new_w = int(w * horizontal_expansion)
-        new_h = int(h * vertical_expansion)
+        # 计算半椭圆的最小半径和最大半径
+        min_ellipse_radius = int(max_radius * random.uniform(2.2, 3))
+        max_ellipse_radius = int(max_radius * random.uniform(3.4, 4.5))
 
-        # 确保边界框不超出图像边界
-        new_x = max(0, new_x)
-        new_y = max(0, new_y)
-        new_w = min(mask.shape[1] - new_x, new_w)
-        new_h = min(mask.shape[0] - new_y, new_h)
+        # 计算白色区域的中心点
+        center_x = x + w // 2
+        center_y = y + h + max_radius
 
-        # 在新蒙版上绘制扩散后的区域
-        expanded_mask[new_y:new_y+new_h, new_x:new_x+new_w] = 255
+        # 确保新纵坐标不超出图像边界
+        center_y = min(mask.shape[0] - 1, center_y)
 
-    return expanded_mask
+        # 绘制半椭圆
+        axes = (min_ellipse_radius, max_ellipse_radius)
+        cv2.ellipse(ellipse_mask, (center_x, center_y), axes, 0, 0, 180, 255, -1)
 
-
-
-
+    return ellipse_mask
 
 def create_mask_from_contours(mask1, mask2):
     """
