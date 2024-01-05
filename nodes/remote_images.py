@@ -47,10 +47,12 @@ def create_smooth_bezier_polygon(mask):
     # 创建一个空白图像
     polygon_image = np.zeros_like(mask)
 
-    # 绘制Bezier曲线
-    for x, y in zip(x_curve, y_curve):
-        cv2.circle(polygon_image, (int(x), int(y)), 1, 255, -1)
+    # 生成多边形的顶点
+    polygon_points = [(int(x), int(y)) for x, y in zip(x_curve, y_curve)]
 
+    # 将多边形填充为白色
+    cv2.fillPoly(polygon_image, [np.array(polygon_points)], 255)
+     
     return polygon_image
 
 
