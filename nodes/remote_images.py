@@ -274,7 +274,7 @@ class LoadImageUrl:
 		print("开始加载")
 		face_image=im_read(face_mask)
 		print("脸部加载")
-		diffused_mask = irregular_diffusion(face_image, min_vertical_distance, min_horizontal_distance)
+		dilated_mask = irregular_diffusion(face_image, min_vertical_distance, min_horizontal_distance)
 
 
 		print("随机完成")
