@@ -14,26 +14,37 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
-def irregular_diffusion(mask, min_vertical_distance, min_horizontal_distance):
+def generate_ellipse_mask(mask):
     """
-    对黑白蒙版图像的白色区域边缘进行不规则扩散。
+    在蒙版图像中白色区域的中心生成一个随机大小的椭圆。
 
-    :param mask: 输入的黑白蒙版图像
-    :param min_vertical_distance: 垂直方向的扩散的最小距离
-    :param min_horizontal_distance: 水平方向的扩散的最小距离
-    :return: 扩散后的图像
+    :param mask: 输入的黑白蒙版图像 (numpy array)
+    :return: 新的蒙版图像，其中包含随机椭圆
     """
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, 
-                                       (min_horizontal_distance * 2 + 1, min_vertical_distance * 2 + 1))
+    # 找到白色区域的轮廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if len(contours) == 0:
+        return mask  # 如果没有找到白色区域，返回原始蒙版
 
-    # 进行膨胀操作
-    dilated_mask = cv2.dilate(mask, kernel, iterations=1)
+    # 获取白色区域的边界框
+    x, y, w, h = cv2.boundingRect(contours[0])
 
-    # 生成随机矩阵并与膨胀后的图像进行比较，以创建不规则效果
-    random_mask = np.random.rand(*dilated_mask.shape) < 0.5
-    irregular_dilated = np.where(random_mask, dilated_mask, mask)
+    # 计算椭圆的尺寸
+    height_factor = random.uniform(1.5, 2)
+    width_factor = random.uniform(1.5, 2)
+    ellipse_height = int(h * height_factor)
+    ellipse_width = int(ellipse_height * width_factor)
 
-    return irregular_dilated
+    # 创建新的蒙版
+    new_mask = np.zeros_like(mask)
+
+    # 计算椭圆的中心点
+    center_x, center_y = x + w // 2, y + h // 2
+
+    # 画椭圆
+    cv2.ellipse(new_mask, (center_x, center_y), (ellipse_width // 2, ellipse_height // 2), 0, 0, 360, 255, -1)
+
+    return new_mask
 
 
 
@@ -266,13 +277,10 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
-		min_vertical_distance = 250
-		min_horizontal_distance = 350
 		print("开始加载")
 		face_image=im_read(face_mask)
 		print("脸部加载")
-		dilated_mask = irregular_diffusion(face_image, min_vertical_distance, min_horizontal_distance)
-
+		dilated_mask = generate_ellipse_mask(face_image)
 
 		print("随机完成")
 		body=im_read(body_mask)
