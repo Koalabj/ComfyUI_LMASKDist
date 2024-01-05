@@ -13,6 +13,34 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
+
+def irregular_diffusion(mask, min_vertical_distance, min_horizontal_distance):
+    """
+    对黑白蒙版图像的白色区域边缘进行不规则扩散。
+
+    :param mask: 输入的黑白蒙版图像
+    :param min_vertical_distance: 垂直方向的扩散的最小距离
+    :param min_horizontal_distance: 水平方向的扩散的最小距离
+    :return: 扩散后的图像
+    """
+    # 创建不规则的扩散核，水平方向宽，垂直方向窄
+    kernel = np.zeros((min_vertical_distance * 2 + 1, min_horizontal_distance * 2 + 1), np.uint8)
+    cv2.ellipse(kernel, (min_horizontal_distance, min_vertical_distance), (min_horizontal_distance, min_vertical_distance), 0, 0, 360, 1, -1)
+
+    # 进行膨胀操作
+    dilated_mask = cv2.dilate(mask, kernel, iterations=1)
+
+    # 创建随机扩散效果
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j] == 255 and dilated_mask[i, j] == 255:
+                if random.random() < 0.5:  # 随机决定是否保留膨胀像素
+                    dilated_mask[i, j] = mask[i, j]
+
+    return dilated_mask
+
+
+
 def create_mask_from_contours(mask1, mask2):
     """
     创建一个新的蒙版，保留mask1中不在mask2的白色轮廓范围内的部分。
@@ -241,40 +269,17 @@ class LoadImageUrl:
 	CATEGORY = "remote"
 
 	def load_image_url(self, face_mask,body_mask):
+		min_vertical_distance = 150
+		min_horizontal_distance = 300
 		print("开始加载")
 		face_image=im_read(face_mask)
 		print("脸部加载")
-		min_vertical_distance=150
-		min_horizontal_distance=300
-		# 创建不规则的扩散核，水平方向宽，垂直方向窄
-		kernel = np.zeros((min_vertical_distance * 2 + 1, min_horizontal_distance * 2 + 1), np.uint8)
-		cv2.ellipse(kernel, (min_horizontal_distance, min_vertical_distance), (min_horizontal_distance, min_vertical_distance), 0, 0, 360, 1, -1)
-		# 进行膨胀操作
-		dilated_mask = cv2.dilate(face_image, kernel, iterations=1)
-		print("膨胀完成")
-    	# 创建随机扩散效果
-		for i in range(face_image.shape[0]):
-			for j in range(face_image.shape[1]):
-				if face_image[i, j] == 255 and dilated_mask[i, j] == 255:
-					if random.random() < 0.5:  # 随机决定是否保留膨胀像素
-						dilated_mask[i, j] = face_image[i, j]
+		diffused_mask = irregular_diffusion(face_image, min_vertical_distance, min_horizontal_distance)
+
+
 		print("随机完成")
 		body=im_read(body_mask)
-		# width = body.shape[0]; height = body.shape[1]
-
-		# center_x, center_y,max_size = find_center_and_max_radius(face_image)
-		# print(f'最小半径{max_size}')
-		# image_size = (face_image.shape[1], face_image.shape[0])  # 图像尺寸
-		# expanded_mask_copy = draw_irregular_shape_with_cv2(center_x, center_y, max_size+100, max_size+200, image_size)
-		# 参数定义
-		Horizon_num = 300 # 坐标点扩散距离
-		Vertical_num = 400
-		# expanded_mask, contours = Borad_draw(threshold_image, qualified_Zuobiao, Horizon_num, Vertical_num, center_x, center_y)
-		# expanded_mask_copy = borad_pz(expanded_mask, contours)
-		# body=im_read(body_mask)
-		# width = body.shape[0]; height = body.shape[1]
-		# im1_copy = cv2.resize(expanded_mask_copy, (height, width))
-          
+		print("身体加载完成")          
 		if dilated_mask.shape[:2] != body.shape[:2]:
 			body=cv2.resize(body, (dilated_mask.shape[1], dilated_mask.shape[0]))
 		if len(dilated_mask.shape) == 2:
