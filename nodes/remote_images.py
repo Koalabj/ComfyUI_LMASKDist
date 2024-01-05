@@ -16,7 +16,6 @@ from torchvision import transforms
 
 def create_smooth_bezier_polygon(mask):
 
-    # 查找白色部分的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if len(contours) == 0:
@@ -42,14 +41,15 @@ def create_smooth_bezier_polygon(mask):
 
     # 生成Bezier曲线上的点
     t = np.linspace(0, 1, 100)
-    curve_points = ((1 - t)**3) * np.array(p0) + 3 * ((1 - t)**2) * t * np.array(p1) + 3 * (1 - t) * (t**2) * np.array(p2) + (t**3) * np.array(p3)
+    x_curve = ((1 - t)**3) * p0[0] + 3 * ((1 - t)**2) * t * p1[0] + 3 * (1 - t) * (t**2) * p2[0] + (t**3) * p3[0]
+    y_curve = ((1 - t)**3) * p0[1] + 3 * ((1 - t)**2) * t * p1[1] + 3 * (1 - t) * (t**2) * p2[1] + (t**3) * p3[1]
 
     # 创建一个空白图像
     polygon_image = np.zeros_like(mask)
 
     # 绘制Bezier曲线
-    for point in curve_points:
-        cv2.circle(polygon_image, (int(point[0]), int(point[1])), 1, 255, -1)
+    for x, y in zip(x_curve, y_curve):
+        cv2.circle(polygon_image, (int(x), int(y)), 1, 255, -1)
 
     return polygon_image
 
