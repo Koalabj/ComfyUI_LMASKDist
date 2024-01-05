@@ -16,35 +16,30 @@ from torchvision import transforms
 
 def create_smooth_bezier_polygon(mask):
 
-    # 找到白色区域的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # 创建一个新的蒙版用于绘制半椭圆
-    ellipse_mask = np.zeros_like(mask)
+    circle_mask = np.zeros_like(mask)
 
     for contour in contours:
-        # 计算轮廓的边界框
         x, y, w, h = cv2.boundingRect(contour)
+        original_radius = max(w, h) / 2
 
-        # 确定原始白色区域的最大半径
-        max_radius = max(w, h) / 2
-
-        # 计算半椭圆的最小半径和最大半径
-        min_ellipse_radius = int(max_radius * random.uniform(2.2, 3))
-        max_ellipse_radius = int(max_radius * random.uniform(3.4, 4.5))
-
-        # 计算白色区域的中心点
+        # 计算新的中心点
         center_x = x + w // 2
-        center_y = y + h + max_radius
+        vertical_shift = int(original_radius * random.uniform(0.5, 1))
+        center_y = y + h // 2 + vertical_shift
 
-        # 确保新纵坐标不超出图像边界
-        center_y = min(mask.shape[0] - 1, center_y)
+        # 设置圆的半径
+        radius = int(original_radius * random.uniform(2, 2.5))
 
-        # 绘制半椭圆
-        axes = (min_ellipse_radius, max_ellipse_radius)
-        cv2.ellipse(ellipse_mask, (center_x, center_y), axes, 0, 0, 180, 255, -1)
+        # 调整圆的位置和大小，确保它在图像范围内
+        center_x = max(radius, min(mask.shape[1] - radius, center_x))
+        center_y = max(radius, min(mask.shape[0] - radius, center_y))
+        radius = min(radius, center_x, mask.shape[1] - center_x, center_y, mask.shape[0] - center_y)
 
-    return ellipse_mask
+        # 绘制圆形
+        cv2.circle(circle_mask, (center_x, center_y), radius, 255, -1)
+
+    return circle_mask
 
 def create_mask_from_contours(mask1, mask2):
     """
