@@ -14,37 +14,47 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
-def generate_ellipse_mask(mask):
-    """
-    在蒙版图像中白色区域的中心生成一个随机大小的椭圆。
+def create_smooth_bezier_polygon(mask_path):
+    # 读取蒙版图像
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
 
-    :param mask: 输入的黑白蒙版图像 (numpy array)
-    :return: 新的蒙版图像，其中包含随机椭圆
-    """
-    # 找到白色区域的轮廓
+    # 查找白色部分的轮廓
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     if len(contours) == 0:
-        return mask  # 如果没有找到白色区域，返回原始蒙版
+        print("没有找到白色区域")
+        return None
 
-    # 获取白色区域的边界框
-    x, y, w, h = cv2.boundingRect(contours[0])
+    # 随机选择一个轮廓
+    selected_contour = random.choice(contours)
 
-    # 计算椭圆的尺寸
-    height_factor = random.uniform(1.5, 2)
-    width_factor = random.uniform(1.5, 2)
-    ellipse_height = int(h * height_factor)
-    ellipse_width = int(ellipse_height * width_factor)
+    # 计算轮廓的中心坐标
+    M = cv2.moments(selected_contour)
+    center_x = int(M["m10"] / M["m00"])
+    center_y = int(M["m01"] / M["m00"])
 
-    # 创建新的蒙版
-    new_mask = np.zeros_like(mask)
+    # 随机生成半径在1.5到2倍之间的倍数
+    radius_multiplier = random.uniform(1.5, 2.0)
 
-    # 计算椭圆的中心点
-    center_x, center_y = x + w // 2, y + h // 2
+    # 计算Bezier曲线的控制点
+    p0 = (center_x, center_y - int(radius_multiplier * center_y))
+    p1 = (center_x - int(radius_multiplier * center_x * 0.5), center_y)
+    p2 = (center_x + int(radius_multiplier * center_x * 0.5), center_y)
+    p3 = (center_x, center_y + int(radius_multiplier * center_y))
 
-    # 画椭圆
-    cv2.ellipse(new_mask, (center_x, center_y), (ellipse_width // 2, ellipse_height // 2), 0, 0, 360, 255, -1)
+    # 生成Bezier曲线上的点
+    t = np.linspace(0, 1, 100)
+    curve_points = ((1 - t)**3) * np.array(p0) + 3 * ((1 - t)**2) * t * np.array(p1) + 3 * (1 - t) * (t**2) * np.array(p2) + (t**3) * np.array(p3)
 
-    return new_mask
+    # 创建一个空白图像
+    polygon_image = np.zeros_like(mask)
+
+    # 绘制Bezier曲线
+    for point in curve_points:
+        cv2.circle(polygon_image, (int(point[0]), int(point[1])), 1, 255, -1)
+
+    return polygon_image
+
 
 
 
@@ -280,7 +290,7 @@ class LoadImageUrl:
 		print("开始加载")
 		face_image=im_read(face_mask)
 		print("脸部加载")
-		dilated_mask = generate_ellipse_mask(face_image)
+		dilated_mask = create_smooth_bezier_polygon(face_image)
 
 		print("随机完成")
 		body=im_read(body_mask)
