@@ -25,11 +25,12 @@ def create_smooth_bezier_polygon(mask):
 
         # 计算新的中心点
         center_x = x + w // 2
-        vertical_shift = int(original_radius * random.uniform(0.5, 1))
-        center_y = y + h // 2 + vertical_shift
+        # vertical_shift = int(original_radius * random.uniform(0.5, 1))
+        # center_y = y + h // 2 + vertical_shift
+        center_y = y + h // 2
 
         # 设置圆的半径
-        radius = int(original_radius * random.uniform(1.8,2.2))
+        radius = int(original_radius * random.uniform(1.3,2.6))
 
         # 调整圆的位置和大小，确保它在图像范围内
         center_x = max(radius, min(mask.shape[1] - radius, center_x))
