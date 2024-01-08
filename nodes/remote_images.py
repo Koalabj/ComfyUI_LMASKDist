@@ -425,7 +425,7 @@ class BodyMask:
 
 		final=cv2.subtract(final_img,rs)
 		# 反色处理
-		inverted_mask = cv2.bitwise_not(final)
+		# inverted_mask = cv2.bitwise_not(final)
 
 		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
