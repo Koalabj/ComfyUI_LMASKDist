@@ -370,6 +370,7 @@ class BodyMask:
 			face_zuobiao_masks = r.masks
 
 		face_img_mask = np.ones_like(img)
+		max_y_coordinate_face = -np.inf 
 		if face_zuobiao_masks != None:
         # 找出每个检测框
 			face_zuobiao = face_zuobiao_masks.xy
@@ -379,7 +380,9 @@ class BodyMask:
 				contours_a = np.array([points])
 			cv2.fillPoly(face_img_mask, contours_a, (255, 255, 255))
             # 找到脸部的最低端坐标(找到 y 轴坐标最大的坐标点)
-			max_y_coordinate_face = item[np.argmax(item[:, 1])]
+			y_coordinate = item[np.argmax(item[:, 1])]
+			if y_coordinate > max_y_coordinate_face:
+				max_y_coordinate_face = y_coordinate
 			print('人脸填充完毕')	
 		else:
 			print('未检测到物体，固未填充')
