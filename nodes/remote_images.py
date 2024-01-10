@@ -422,7 +422,7 @@ class BodyMask:
 		else:
 			hair_face_img=face_img_mask
 		max_y_coordinate_face=max_y_coordinate_face-10
-		hair_face_img=blacken_below_y(hair_face_img,int(y))
+		hair_face_img=blacken_below_y(hair_face_img,int(max_y_coordinate_face))
 		# if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
 		# 	button_zuobiao = max_y_coordinate_face
 		# else:
