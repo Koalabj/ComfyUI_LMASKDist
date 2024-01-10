@@ -438,7 +438,8 @@ class BodyMask:
 		
 		# final_img=blacken_above_y(final_img,top)
 		final_img1=np.copy(final_img)
-		final=blacken_above_y(final_img1,bootm)
+		print(f"计算的最低点坐标为{bootm}")
+		final=blacken_above_y(final_img1,int(bootm))
 		# final_img20=blacken_below_y(final_img1,bootm)
 		# rs=create_mask_from_contours(final_img20,body20)
 		# rs=blacken_below_y(rs,top)
