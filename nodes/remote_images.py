@@ -14,6 +14,14 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 
+def blacken_above_y(mask, y_coord):
+    if y_coord < 0 or y_coord >= mask.shape[0]:
+        raise ValueError("y_coord is out of the image bounds.")
+
+    # 将纵坐标以上的部分设置为黑色
+    mask[:y_coord, :] = 0
+    return mask
+
 def create_smooth_bezier_polygon(mask):
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -320,11 +328,11 @@ class BodyMask:
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
 
-		hight=body.shape[0]
-		print(f"图片高度{hight}")
-		bootm=int((hight-top)*2/10+top)
-		print(f"底部坐标{bootm}")
-		body20=blacken_below_y(body,bootm)
+		# hight=body.shape[0]
+		# print(f"图片高度{hight}")
+		# bootm=int((hight-top)*2/10+top)
+		# print(f"底部坐标{bootm}")
+		# body20=blacken_below_y(body,bootm)
 
         # 保存图片
 		pic=tensor_to_pil(image)
@@ -417,13 +425,21 @@ class BodyMask:
 		
 		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
+		# 计算最低点坐标
+		bootm=0
+		if(top>max_y_coordinate_face):
+			bootm=top
+		else:
+			bootm=max_y_coordinate_face
+		
 		# final_img=blacken_above_y(final_img,top)
 		final_img1=np.copy(final_img)
-		final_img20=blacken_below_y(final_img1,bootm)
-		rs=create_mask_from_contours(final_img20,body20)
+		final=blacken_above_y(final_img1,bootm)
+		# final_img20=blacken_below_y(final_img1,bootm)
+		# rs=create_mask_from_contours(final_img20,body20)
 		# rs=blacken_below_y(rs,top)
 
-		final=cv2.subtract(final_img,rs)
+		# final=cv2.subtract(final_img,rs)
 		# 反色处理
 		inverted_mask = cv2.bitwise_not(final)
 
