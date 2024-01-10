@@ -383,6 +383,7 @@ class BodyMask:
 			y_coordinate = item[np.argmax(item[:, 1])]
 			if y_coordinate > max_y_coordinate_face:
 				max_y_coordinate_face = y_coordinate
+			print(f"脸部y最低坐标：{max_y_coordinate_face}")
 			print('人脸填充完毕')	
 		else:
 			print('未检测到物体，固未填充')
