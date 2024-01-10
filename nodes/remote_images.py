@@ -432,9 +432,9 @@ class BodyMask:
 		# 计算最低点坐标
 		bootm=0
 		if(top>max_y_coordinate_face):
-			bootm=top
-		else:
 			bootm=max_y_coordinate_face
+		else:
+			bootm=top
 		
 		# final_img=blacken_above_y(final_img,top)
 		final_img1=np.copy(final_img)
