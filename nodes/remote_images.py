@@ -415,13 +415,14 @@ class BodyMask:
 				print('头发填充完毕')
 			else:
 				print('未检测到物体，固未填充')
-
+		
 		# 头发+脸部的蒙版
 		if hair_img_mask is not None:
 			hair_face_img = cv2.add(hair_img_mask, face_img_mask)
 		else:
 			hair_face_img=face_img_mask
-
+		max_y_coordinate_face=max_y_coordinate_face-10
+		hair_face_img=blacken_below_y(hair_face_img,int(y))
 		# if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
 		# 	button_zuobiao = max_y_coordinate_face
 		# else:
@@ -439,7 +440,7 @@ class BodyMask:
 		# final_img=blacken_above_y(final_img,top)
 		final_img1=np.copy(final_img)
 		print(f"计算的最低点坐标为{bootm}")
-		final=blacken_above_y(final_img1,int(bootm-20))
+		final=blacken_above_y(final_img1,int(bootm))
 		# final_img20=blacken_below_y(final_img1,bootm)
 		# rs=create_mask_from_contours(final_img20,body20)
 		# rs=blacken_below_y(rs,top)
