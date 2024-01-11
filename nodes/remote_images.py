@@ -469,19 +469,19 @@ class BodyMask:
 		final_img = cv2.subtract(person_img, hair_face_img1)
 		# 计算最低点坐标
 		# 临时测试
-		# bootm=0
-		# if(top>max_y_coordinate_face):
-		# 	bootm=max_y_coordinate_face
-		# else:
-		# 	bootm=top
+		bootm=0
+		if(top>max_y_coordinate_face):
+			bootm=max_y_coordinate_face
+		else:
+			bootm=top
 		
-		# final_img1=np.copy(final_img)
-		# print(f"计算的最低点坐标为{bootm}")
-		# final=blacken_above_y(final_img1,int(bootm))
-		# # 反色处理
-		# inverted_mask = cv2.bitwise_not(final)
+		final_img1=np.copy(final_img)
+		print(f"计算的最低点坐标为{bootm}")
+		final=blacken_above_y(final_img1,int(bootm))
+		# 反色处理
+		inverted_mask = cv2.bitwise_not(final)
 
-		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
