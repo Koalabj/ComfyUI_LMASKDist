@@ -382,13 +382,13 @@ class BodyMask:
 		print(f"顶部坐标{top}")
 		person=cv2.imread(path)
 		person_img = cv2.cvtColor(person, cv2.COLOR_BGR2GRAY)
-		_, numpy_image = cv2.threshold(person_img, 127, 255, cv2.THRESH_BINARY)
-		kernel = np.ones((3,3),np.uint8) 
-		numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
-		person_img_mask = cv2.dilate(numpy_image, kernel, iterations=1)
-		path="/root/autodl-tmp/ComfyUI/input/yt2.png"
-		cv2.imwrite(path,person_img_mask)
-		person_img_mask=person
+		# _, numpy_image = cv2.threshold(person_img, 127, 255, cv2.THRESH_BINARY)
+		# kernel = np.ones((3,3),np.uint8) 
+		# numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
+		# person_img_mask = cv2.dilate(numpy_image, kernel, iterations=1)
+		# path="/root/autodl-tmp/ComfyUI/input/yt2.png"
+		# cv2.imwrite(path,person_img_mask)
+		# person_img_mask=person
 		# 获取输入的图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
