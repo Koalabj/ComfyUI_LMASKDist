@@ -387,7 +387,7 @@ class BodyMask:
 		numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
 		person_img_mask = cv2.dilate(numpy_image, kernel, iterations=1)
 		path="/root/autodl-tmp/ComfyUI/input/yt2.png"
-		person_img_mask.save(path)
+		cv2.imwrite(path,person_img_mask)
 		# 获取输入的图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
