@@ -486,7 +486,8 @@ class BodyMask:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 反色处理
 		s = 1.0 - torch_img
-		numpy_image = s.cpu().numpy()
+		s_copy = s.clone()
+		numpy_image = s_copy.cpu().numpy()
 		if numpy_image.ndim == 4:
         # 假设是批量处理的图像，取第一个图像
 			numpy_image = numpy_image[0]
@@ -497,7 +498,7 @@ class BodyMask:
 		numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
         # 处理图像
 		height, width, _ = numpy_image.shape
-		threshold=240
+		threshold=230
 		for y in range(height):
 			for x in range(width):
             # 检查是否接近白色
