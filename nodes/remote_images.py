@@ -380,7 +380,7 @@ class BodyMask:
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
-		person_img=cv2.im_read(path)
+		person_img=cv2.imread(path)
 		person_img = cv2.cvtColor(person_img, cv2.COLOR_BGR2GRAY)
 		_, numpy_image = cv2.threshold(person_img, 127, 255, cv2.THRESH_BINARY)
 		kernel = np.ones((3,3),np.uint8) 
