@@ -24,26 +24,46 @@ def make_non_black_white(tensor):
     Returns:
     torch.Tensor: Modified image tensor where all non-black pixels have been changed to white.
     """
-    # Ensure tensor is on CPU and convert to numpy array
-    numpy_image = tensor.cpu().numpy()
+    tensor = tensor.to(torch.float32)
+	# 检查通道数并转换
+    if tensor.ndim == 2:  # 灰度图（无通道维度）
+        tensor = tensor.unsqueeze(0).repeat(3, 1, 1)
+    elif tensor.ndim == 3 and tensor.shape[0] == 1:  # 单通道图
+        tensor = tensor.repeat(3, 1, 1)
+    elif tensor.ndim != 3 or tensor.shape[0] != 3:
+        raise ValueError("Input tensor must have 3 channels or be convertible to 3 channels")
+	# 将张量转换为 0 到 1 范围
+    tensor = torch.clamp(tensor, min=0.0, max=1.0)
 
-    # Check if the tensor is in the expected shape (C, H, W)
-    if numpy_image.shape[0] != 3:
-        raise ValueError("Input tensor must have 3 channels")
+    # 创建一个与输入张量形状相同的白色张量
+    white_tensor = torch.ones_like(tensor)
 
-    # Convert to 8-bit format and transpose to HWC for processing
-    numpy_image = np.transpose(numpy_image, (1, 2, 0))
-    numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+    # 寻找所有非黑色像素（即任何通道大于 0 的像素）
+    non_black_mask = tensor.max(dim=0, keepdim=True).values > 0
 
-    # Find all non-black pixels (any pixel where all RGB values are not 0) and set them to white
-    mask = np.any(numpy_image != 0, axis=-1)
-    numpy_image[mask] = [255, 255, 255]
+    # 将非黑色像素替换为白色
+    tensor.masked_scatter_(non_black_mask, white_tensor.masked_select(non_black_mask))
 
-    # Convert back to CHW format and normalize to [0, 1]
-    numpy_image = np.transpose(numpy_image, (2, 0, 1)).astype(np.float32) / 255.0
+    # # Ensure tensor is on CPU and convert to numpy array
+    # numpy_image = tensor.cpu().numpy()
+
+    # # Check if the tensor is in the expected shape (C, H, W)
+    # if numpy_image.shape[0] != 3:
+    #     raise ValueError("Input tensor must have 3 channels")
+
+    # # Convert to 8-bit format and transpose to HWC for processing
+    # numpy_image = np.transpose(numpy_image, (1, 2, 0))
+    # numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+
+    # # Find all non-black pixels (any pixel where all RGB values are not 0) and set them to white
+    # mask = np.any(numpy_image != 0, axis=-1)
+    # numpy_image[mask] = [255, 255, 255]
+
+    # # Convert back to CHW format and normalize to [0, 1]
+    # numpy_image = np.transpose(numpy_image, (2, 0, 1)).astype(np.float32) / 255.0
 
     # Convert back to PyTorch tensor
-    return torch.from_numpy(numpy_image)
+    return tensor
 
 #平滑处理二值图
 def tensor_to_image(tensor: torch.Tensor) -> np.array:
