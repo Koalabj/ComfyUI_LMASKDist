@@ -486,39 +486,39 @@ class BodyMask:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 反色处理
 		s = 1.0 - torch_img
-		s_copy = s.clone()
-		numpy_image = s_copy.cpu().numpy()
-		if numpy_image.ndim == 4:
-        # 假设是批量处理的图像，取第一个图像
-			numpy_image = numpy_image[0]
-		if numpy_image.ndim == 3 and numpy_image.shape[0] == 3:
-        # 正确的 CHW 维度，进行转置
-			numpy_image = np.transpose(numpy_image, (1, 2, 0))
-		# numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
-		numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-        # 处理图像
-		height, width, _ = numpy_image.shape
-		threshold=220
-		for y in range(height):
-			for x in range(width):
-            # 检查是否接近白色
-				if all(numpy_image[y, x] > threshold):
-						numpy_image[y, x] = [255, 255, 255]
-		if len(numpy_image.shape) == 2:
-			numpy_image = numpy_image[:, :, np.newaxis]
+		# s_copy = s.clone()
+		# numpy_image = s_copy.cpu().numpy()
+		# if numpy_image.ndim == 4:
+        # # 假设是批量处理的图像，取第一个图像
+		# 	numpy_image = numpy_image[0]
+		# if numpy_image.ndim == 3 and numpy_image.shape[0] == 3:
+        # # 正确的 CHW 维度，进行转置
+		# 	numpy_image = np.transpose(numpy_image, (1, 2, 0))
+		# # numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
+		# numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+        # # 处理图像
+		# height, width, _ = numpy_image.shape
+		# threshold=220
+		# for y in range(height):
+		# 	for x in range(width):
+        #     # 检查是否接近白色
+		# 		if all(numpy_image[y, x] > threshold):
+		# 				numpy_image[y, x] = [255, 255, 255]
+		# if len(numpy_image.shape) == 2:
+		# 	numpy_image = numpy_image[:, :, np.newaxis]
 
-		# 转换数组形状为 (C, H, W)
-		numpy_image = np.transpose(numpy_image, (2, 0, 1))
+		# # 转换数组形状为 (C, H, W)
+		# numpy_image = np.transpose(numpy_image, (2, 0, 1))
 
-		# 将数组类型转换为浮点数，并标准化到 [0.0, 1.0]
-		numpy_image = numpy_image.astype(np.float32) / 255.0
+		# # 将数组类型转换为浮点数，并标准化到 [0.0, 1.0]
+		# numpy_image = numpy_image.astype(np.float32) / 255.0
 
-		# 将 NumPy 数组转换为 PyTorch 张量
-		tensor_image = torch.from_numpy(numpy_image)
+		# # 将 NumPy 数组转换为 PyTorch 张量
+		# tensor_image = torch.from_numpy(numpy_image)
 		
 
 
-		return (tensor_image,)
+		return (s,)
 	
 	
 		
