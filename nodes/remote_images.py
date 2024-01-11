@@ -13,6 +13,38 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
+
+def make_non_black_white(tensor):
+    """
+    Convert all non-black pixels of an image tensor to white and return the modified image tensor.
+
+    Parameters:
+    tensor (torch.Tensor): An image tensor with shape (C, H, W) and pixel values in [0, 1].
+
+    Returns:
+    torch.Tensor: Modified image tensor where all non-black pixels have been changed to white.
+    """
+    # Ensure tensor is on CPU and convert to numpy array
+    numpy_image = tensor.cpu().numpy()
+
+    # Check if the tensor is in the expected shape (C, H, W)
+    if numpy_image.shape[0] != 3:
+        raise ValueError("Input tensor must have 3 channels")
+
+    # Convert to 8-bit format and transpose to HWC for processing
+    numpy_image = np.transpose(numpy_image, (1, 2, 0))
+    numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+
+    # Find all non-black pixels (any pixel where all RGB values are not 0) and set them to white
+    mask = np.any(numpy_image != 0, axis=-1)
+    numpy_image[mask] = [255, 255, 255]
+
+    # Convert back to CHW format and normalize to [0, 1]
+    numpy_image = np.transpose(numpy_image, (2, 0, 1)).astype(np.float32) / 255.0
+
+    # Convert back to PyTorch tensor
+    return torch.from_numpy(numpy_image)
+
 #平滑处理二值图
 def tensor_to_image(tensor: torch.Tensor) -> np.array:
     """Converts a PyTorch tensor image to a numpy image.
@@ -486,6 +518,8 @@ class BodyMask:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 反色处理
 		s = 1.0 - torch_img
+        
+		s1=make_non_black_white(s)
 		# s_copy = s.clone()
 		# numpy_image = s_copy.cpu().numpy()
 		# if numpy_image.ndim == 4:
@@ -518,7 +552,7 @@ class BodyMask:
 		
 
 
-		return (s,)
+		return (s1,)
 	
 	
 		
