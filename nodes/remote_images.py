@@ -486,6 +486,7 @@ class BodyMask:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 反色处理
 		s = 1.0 - torch_img
+            
 		return (s,)
 	
 	
