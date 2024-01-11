@@ -485,9 +485,23 @@ class BodyMask:
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 反色处理
-		# s = 1.0 - torch_img
-            
-		return (torch_img,)
+		s = 1.0 - torch_img
+		numpy_image = s.cpu().numpy()
+		numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
+		numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+        # 处理图像
+		height, width, _ = numpy_image.shape
+		threshold=245
+		for y in range(height):
+			for x in range(width):
+            # 检查是否接近白色
+				if all(numpy_image[y, x] > threshold):
+						numpy_image[y, x] = [255, 255, 255]
+
+    # 将处理后的数组转换回 PIL 图像并保存
+		processed_img = Image.fromarray(numpy_image)
+		t=pil_to_tensor(processed_img)
+		return (t,)
 	
 	
 		
