@@ -323,18 +323,15 @@ class BodyMask:
 	FUNCTION = "BodyMaskMake"
 	CATEGORY = "remote"
 	def BodyMaskMake(self,image,body_mask,person_mask):
+		# 获取衣服的蒙版图
 		body=im_read(body_mask)
+		#获取整个人的蒙版图
 		person_img_mask=im_read(person_mask)
+		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
 
-		# hight=body.shape[0]
-		# print(f"图片高度{hight}")
-		# bootm=int((hight-top)*2/10+top)
-		# print(f"底部坐标{bootm}")
-		# body20=blacken_below_y(body,bootm)
-
-        # 保存图片
+		# 获取输入的图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
 		pic.save(path)
@@ -343,24 +340,7 @@ class BodyMask:
 		gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
 		_, img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
 
-		# model = YOLO(task='detect',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/person_yolov8n-seg.pt')
-		# # model.eval()
-		# results = model(source=path, mode='val')
-		# # # 测试 将结果解析为pil图片
-		# #  # View results
-		# for r in results:
-		# 	person_zuobiao_masks = r.masks
-		# person_img_mask = np.ones_like(img)
-		# if person_zuobiao_masks != None:
-		# 	person_zuobiao = person_zuobiao_masks.xy
-		# 	for item in person_zuobiao:
-		# 		points = np.array(item, dtype=np.int32)
-        #    		# 将轮廓列表转换为多维数组格式
-		# 		contours_a = np.array([points])
-		# 	cv2.fillPoly(person_img_mask, contours_a, (255, 255, 255))
-		# 	print('人体填充完毕')
-		# else:
-		# 	print('未检测到物体，固未填充')
+		
 		
 		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/face_yolov8m-seg_60.pt')
     	# Run inference on an image
@@ -421,35 +401,23 @@ class BodyMask:
 			hair_face_img = cv2.add(hair_img_mask, face_img_mask)
 		else:
 			hair_face_img=face_img_mask
-		# max_y_coordinate_face=max_y_coordinate_face-30
-		# hair_face_img=blacken_below_y(hair_face_img,int(max_y_coordinate_face))
-		# if max_y_coordinate_face[1] > max_y_coordinate_hair[1]:
-		# 	button_zuobiao = max_y_coordinate_face
-		# else:
-		# 	buttton_zuobiao = max_y_coordinate_hair
-		
-		# hair_face_img[:int((button_zuobiao[1] * 5) / 6), :] = 255
+		# 使用全身照减去头部
 		final_img = cv2.subtract(person_img_mask, hair_face_img)
 		# 计算最低点坐标
-		bootm=0
-		if(top>max_y_coordinate_face):
-			bootm=max_y_coordinate_face
-		else:
-			bootm=top
+		# 临时测试
+		# bootm=0
+		# if(top>max_y_coordinate_face):
+		# 	bootm=max_y_coordinate_face
+		# else:
+		# 	bootm=top
 		
-		# final_img=blacken_above_y(final_img,top)
-		final_img1=np.copy(final_img)
-		print(f"计算的最低点坐标为{bootm}")
-		final=blacken_above_y(final_img1,int(bootm))
-		# final_img20=blacken_below_y(final_img1,bootm)
-		# rs=create_mask_from_contours(final_img20,body20)
-		# rs=blacken_below_y(rs,top)
+		# final_img1=np.copy(final_img)
+		# print(f"计算的最低点坐标为{bootm}")
+		# final=blacken_above_y(final_img1,int(bootm))
+		# # 反色处理
+		# inverted_mask = cv2.bitwise_not(final)
 
-		# final=cv2.subtract(final_img,rs)
-		# 反色处理
-		inverted_mask = cv2.bitwise_not(final)
-
-		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(final_img, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
 
