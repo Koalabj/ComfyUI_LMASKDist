@@ -539,7 +539,8 @@ class BodyMask:
 		final=blacken_above_y(final_img1,int(bootm))
 		# 反色处理
 		inverted_mask = cv2.bitwise_not(final)
-            
+		if len(inverted_mask.shape) == 2 or inverted_mask.shape[2] == 1:
+			image = cv2.cvtColor(inverted_mask, cv2.COLOR_GRAY2BGR)
 		result_image = inverted_mask.copy()
 
 		# 创建一个黑色掩膜，标记出所有非黑色的像素
