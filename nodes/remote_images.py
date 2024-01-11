@@ -505,10 +505,12 @@ class BodyMask:
 						numpy_image[y, x] = [255, 255, 255]
 
     # 将处理后的数组转换回 PIL 图像并保存
-		processed_img = Image.fromarray(numpy_image)
-		t= Image.fromarray(np.clip(255. * processed_img.numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
+		numpy_image = np.transpose(numpy_image, (2, 0, 1))
+		numpy_image = numpy_image.astype(np.float32) / 255.0
+		tensor_image = torch.from_numpy(numpy_image)
 
-		return (t,)
+
+		return (tensor_image,)
 	
 	
 		
