@@ -479,13 +479,14 @@ class BodyMask:
 		print(f"计算的最低点坐标为{bootm}")
 		final=blacken_above_y(final_img1,int(bootm))
 		# 反色处理
-		inverted_mask = cv2.bitwise_not(final)
+		# inverted_mask = cv2.bitwise_not(final)
 
-		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
-
-		return (torch_img,)
+        # 反色处理
+		s = 1.0 - torch_img
+		return (s,)
 	
 	
 		
