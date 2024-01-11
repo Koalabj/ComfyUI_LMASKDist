@@ -327,7 +327,7 @@ class BodyMask:
 		body=im_read(body_mask)
 		#获取整个人的蒙版图
 		person_img_mask=im_read(person_mask)
-		cv2.imwrite(person_img_mask,"/root/autodl-tmp/ComfyUI/input/yt1.png")
+		cv2.imwrite("/root/autodl-tmp/ComfyUI/input/yt1.png",person_img_mask)
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
