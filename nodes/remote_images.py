@@ -459,8 +459,14 @@ class BodyMask:
 			hair_face_img = cv2.add(hair_img_mask, face_img_mask)
 		else:
 			hair_face_img=face_img_mask
+        
+		path="/root/autodl-tmp/ComfyUI/input/yt3.png"
+		cv2.imwrite(path,hair_face_img)
+		hair_face_img1=cv2.imread(path)
+		hair_face_img1 = cv2.cvtColor(hair_face_img1, cv2.COLOR_BGR2GRAY)
+
 		# 使用全身照减去头部
-		final_img = cv2.subtract(person_img_mask, hair_face_img)
+		final_img = cv2.subtract(person_img, hair_face_img1)
 		# 计算最低点坐标
 		# 临时测试
 		# bootm=0
