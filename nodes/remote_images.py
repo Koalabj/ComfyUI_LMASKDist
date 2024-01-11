@@ -373,12 +373,21 @@ class BodyMask:
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
 		#获取整个人的蒙版图
-		person_img_mask=tensor_to_image(person_mask)
-		cv2.imwrite("/root/autodl-tmp/ComfyUI/input/yt1.png",person_img_mask)
+		# person_img_mask=tensor_to_image(person_mask)
+		person=tensor_to_pil(person_mask)
+		path="/root/autodl-tmp/ComfyUI/input/yt1.png"
+		person.save(path)
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
-
+		person_img=cv2.im_read(path)
+		person_img = cv2.cvtColor(person_img, cv2.COLOR_BGR2GRAY)
+		_, numpy_image = cv2.threshold(person_img, 127, 255, cv2.THRESH_BINARY)
+		kernel = np.ones((3,3),np.uint8) 
+		numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
+		person_img_mask = cv2.dilate(numpy_image, kernel, iterations=1)
+		path="/root/autodl-tmp/ComfyUI/input/yt2.png"
+		person_img_mask.save(path)
 		# 获取输入的图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
