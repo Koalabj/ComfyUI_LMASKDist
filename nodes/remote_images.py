@@ -25,13 +25,20 @@ def make_non_black_white(tensor):
     torch.Tensor: Modified image tensor where all non-black pixels have been changed to white.
     """
     tensor = tensor.to(torch.float32)
-	# 检查通道数并转换
+    # 检查张量的维度
     if tensor.ndim == 2:  # 灰度图（无通道维度）
         tensor = tensor.unsqueeze(0).repeat(3, 1, 1)
-    elif tensor.ndim == 3 and tensor.shape[0] == 1:  # 单通道图
-        tensor = tensor.repeat(3, 1, 1)
-    elif tensor.ndim != 3 or tensor.shape[0] != 3:
-        raise ValueError("Input tensor must have 3 channels or be convertible to 3 channels")
+    elif tensor.ndim == 3:
+        if tensor.shape[0] == 1:  # 单通道图
+            tensor = tensor.repeat(3, 1, 1)
+        elif tensor.shape[0] != 3:
+            raise ValueError("Input tensor must have 1 or 3 channels")
+    elif tensor.ndim == 4 and tensor.shape[1] == 3:  # 批处理张量
+        # 这里可以根据需要处理批处理张量
+        tensor = tensor[0]
+        # raise ValueError("Batch tensors are not supported. Please input a single image tensor.")
+    else:
+        raise ValueError("Unsupported tensor format")
 	# 将张量转换为 0 到 1 范围
     tensor = torch.clamp(tensor, min=0.0, max=1.0)
 
