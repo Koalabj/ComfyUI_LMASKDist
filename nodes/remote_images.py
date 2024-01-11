@@ -127,10 +127,14 @@ def im_read(face_mask):
 	elif face_mask_image.shape[0] == 1:
 		face_mask_image = face_mask_image.squeeze(0)
 
+    # 确保图像是单通道的
+	if len(face_mask_image.shape) != 2:
+		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_BGR2GRAY)
+
     # 应用高斯模糊进行平滑处理
 	face_mask_image = cv2.GaussianBlur(face_mask_image, (5, 5), 0)
 
-    # 应用自适应阈值而非普通阈值
+    # 应用自适应阈值
 	threshold_image = cv2.adaptiveThreshold(face_mask_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
 	return threshold_image
