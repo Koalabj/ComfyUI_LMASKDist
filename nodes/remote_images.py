@@ -506,7 +506,8 @@ class BodyMask:
 
     # 将处理后的数组转换回 PIL 图像并保存
 		processed_img = Image.fromarray(numpy_image)
-		t=pil_to_tensor(processed_img)
+		t= Image.fromarray(np.clip(255. * processed_img.numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
+
 		return (t,)
 	
 	
