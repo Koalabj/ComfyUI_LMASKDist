@@ -538,15 +538,18 @@ class BodyMask:
 		print(f"计算的最低点坐标为{bootm}")
 		final=blacken_above_y(final_img1,int(bootm))
 		# 反色处理
-		# inverted_mask = cv2.bitwise_not(final)
+		inverted_mask = cv2.bitwise_not(final)
+		white_image = np.ones_like(inverted_mask) * 255
+		black_mask = np.all(inverted_mask == [0, 0, 0], axis=-1)
+		inverted_mask[~black_mask] = white_image[~black_mask]
 
-		result = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
+		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
-        # 反色处理
-		s = 1.0 - torch_img
+        # # 反色处理
+		# s = 1.0 - torch_img
         
-		s1=make_non_black_white(s)
+		# s1=make_non_black_white(s)
 		# s_copy = s.clone()
 		# numpy_image = s_copy.cpu().numpy()
 		# if numpy_image.ndim == 4:
@@ -579,7 +582,7 @@ class BodyMask:
 		
 
 
-		return (s1,)
+		return (torch_img,)
 	
 	
 		
