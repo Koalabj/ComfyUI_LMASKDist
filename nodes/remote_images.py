@@ -14,28 +14,22 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 #平滑处理二值图
-def prepare_image(tensor):
-    numpy_image = tensor.cpu().numpy()
-    numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-    
-    # 适当调整图像维度
-    if numpy_image.ndim == 3:
-        if numpy_image.shape[0] == 1:  # 如果是单通道图像
-            numpy_image = numpy_image.squeeze(0)
-        elif numpy_image.shape[2] == 3:  # 如果是三通道图像
-            numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_BGR2GRAY)
-    elif numpy_image.ndim == 4 and numpy_image.shape[1] == 1:
-        numpy_image = numpy_image.squeeze(1)
+def tensor_to_cv2_image(tensor):
+    # 假设 tensor 是一个 numpy 数组
 
-    # 应用形态学操作
-    kernel = np.ones((3, 3), np.uint8)
-    numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
-    numpy_image = cv2.dilate(numpy_image, kernel, iterations=1)
+    # 如果张量的数据类型是浮点数，将其转换为 [0, 255] 范围内的整数
+    if tensor.dtype == np.float32 or tensor.dtype == np.float64:
+        tensor = (tensor * 255).astype(np.uint8)
 
-    # 确保数组在内存中是连续的
-    numpy_image = numpy_image.copy()
+    # 如果张量的形状是 [通道数, 高度, 宽度]，转换为 [高度, 宽度, 通道数]
+    if tensor.shape[0] < tensor.shape[1]:  # 这是一个简单的形状检查
+        tensor = np.transpose(tensor, (1, 2, 0))
 
-    return numpy_image
+    # 如果张量是 RGB 格式，转换为 BGR 格式
+    if tensor.shape[2] == 3:
+        tensor = cv2.cvtColor(tensor, cv2.COLOR_RGB2BGR)
+
+    return tensor
 def blacken_above_y(mask, y_coord):
     if y_coord < 0 or y_coord >= mask.shape[0]:
         raise ValueError("y_coord is out of the image bounds.")
@@ -348,7 +342,7 @@ class BodyMask:
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
 		#获取整个人的蒙版图
-		person_img_mask=prepare_image(person_mask)
+		person_img_mask=tensor_to_cv2_image(person_mask)
 		cv2.imwrite("/root/autodl-tmp/ComfyUI/input/yt1.png",person_img_mask)
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
