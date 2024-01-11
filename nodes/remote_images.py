@@ -487,7 +487,13 @@ class BodyMask:
         # 反色处理
 		s = 1.0 - torch_img
 		numpy_image = s.cpu().numpy()
-		numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
+		if numpy_image.ndim == 4:
+        # 假设是批量处理的图像，取第一个图像
+			numpy_image = numpy_image[0]
+		if numpy_image.ndim == 3 and numpy_image.shape[0] == 3:
+        # 正确的 CHW 维度，进行转置
+			numpy_image = np.transpose(numpy_image, (1, 2, 0))
+		# numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
 		numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
         # 处理图像
 		height, width, _ = numpy_image.shape
