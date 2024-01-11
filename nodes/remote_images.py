@@ -18,20 +18,22 @@ def prepare_image(tensor):
     numpy_image = tensor.cpu().numpy()
     numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
     
-    if len(numpy_image.shape) == 3 and numpy_image.shape[0] == 1:
-        numpy_image = numpy_image.squeeze(0)
-    elif len(numpy_image.shape) == 4 and numpy_image.shape[1] == 1:
+    # 适当调整图像维度
+    if numpy_image.ndim == 3:
+        if numpy_image.shape[0] == 1:  # 如果是单通道图像
+            numpy_image = numpy_image.squeeze(0)
+        elif numpy_image.shape[2] == 3:  # 如果是三通道图像
+            numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_BGR2GRAY)
+    elif numpy_image.ndim == 4 and numpy_image.shape[1] == 1:
         numpy_image = numpy_image.squeeze(1)
 
-    # 确保图像是单通道的
-    if len(numpy_image.shape) == 3 and numpy_image.shape[2] == 3:
-        numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_BGR2GRAY)
-
-    # 可选：进行形态学操作以改善图像质量
-    # 例如，使用腐蚀和膨胀来平滑边界
+    # 应用形态学操作
     kernel = np.ones((3, 3), np.uint8)
     numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
     numpy_image = cv2.dilate(numpy_image, kernel, iterations=1)
+
+    # 确保数组在内存中是连续的
+    numpy_image = numpy_image.copy()
 
     return numpy_image
 def blacken_above_y(mask, y_coord):
