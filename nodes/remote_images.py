@@ -14,22 +14,53 @@ from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
 #平滑处理二值图
-def tensor_to_cv2_image(tensor):
-    # 假设 tensor 是一个 numpy 数组
+def tensor_to_image(tensor: torch.Tensor) -> np.array:
+    """Converts a PyTorch tensor image to a numpy image.
 
-    # 如果张量的数据类型是浮点数，将其转换为 [0, 255] 范围内的整数
-    if tensor.dtype == np.float32 or tensor.dtype == np.float64:
-        tensor = (tensor * 255).astype(np.uint8)
+    In case the tensor is in the GPU, it will be copied back to CPU.
 
-    # 如果张量的形状是 [通道数, 高度, 宽度]，转换为 [高度, 宽度, 通道数]
-    if tensor.shape[0] < tensor.shape[1]:  # 这是一个简单的形状检查
-        tensor = np.transpose(tensor, (1, 2, 0))
+    Args:
+        tensor (torch.Tensor): image of the form :math:`(H, W)`, :math:`(C, H, W)` or
+            :math:`(B, C, H, W)`.
 
-    # 如果张量是 RGB 格式，转换为 BGR 格式
-    if tensor.shape[2] == 3:
-        tensor = cv2.cvtColor(tensor, cv2.COLOR_RGB2BGR)
+    Returns:
+        numpy.ndarray: image of the form :math:`(H, W)`, :math:`(H, W, C)` or :math:`(B, H, W, C)`.
 
-    return tensor
+    """
+    if not isinstance(tensor, torch.Tensor):
+        raise TypeError("Input type is not a torch.Tensor. Got {}".format(
+            type(tensor)))
+
+    if len(tensor.shape) > 4 or len(tensor.shape) < 2:
+        raise ValueError(
+            "Input size must be a two, three or four dimensional tensor")
+
+    input_shape = tensor.shape
+    image: np.array = tensor.cpu().detach().numpy()
+
+    if len(input_shape) == 2:
+        # (H, W) -> (H, W)
+        image = image
+    elif len(input_shape) == 3:
+        # (C, H, W) -> (H, W, C)
+        if input_shape[0] == 1:
+            # Grayscale for proper plt.imshow needs to be (H,W)
+            image = image.squeeze()
+        else:
+            image = image.transpose(1, 2, 0)
+    elif len(input_shape) == 4:
+        # (B, C, H, W) -> (B, H, W, C)
+        image = image.transpose(0, 2, 3, 1)
+        if input_shape[0] == 1:
+            image = image.squeeze(0)
+        if input_shape[1] == 1:
+            image = image.squeeze(-1)
+    else:
+        raise ValueError(
+            "Cannot process tensor with shape {}".format(input_shape))
+
+    return image
+
 def blacken_above_y(mask, y_coord):
     if y_coord < 0 or y_coord >= mask.shape[0]:
         raise ValueError("y_coord is out of the image bounds.")
@@ -342,7 +373,7 @@ class BodyMask:
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
 		#获取整个人的蒙版图
-		person_img_mask=tensor_to_cv2_image(person_mask)
+		person_img_mask=tensor_to_image(person_mask)
 		cv2.imwrite("/root/autodl-tmp/ComfyUI/input/yt1.png",person_img_mask)
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
