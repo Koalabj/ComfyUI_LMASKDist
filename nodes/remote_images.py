@@ -13,7 +13,27 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
+#平滑处理二值图
+def prepare_image(tensor):
+    numpy_image = tensor.cpu().numpy()
+    numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+    
+    if len(numpy_image.shape) == 3 and numpy_image.shape[0] == 1:
+        numpy_image = numpy_image.squeeze(0)
+    elif len(numpy_image.shape) == 4 and numpy_image.shape[1] == 1:
+        numpy_image = numpy_image.squeeze(1)
 
+    # 确保图像是单通道的
+    if len(numpy_image.shape) == 3 and numpy_image.shape[2] == 3:
+        numpy_image = cv2.cvtColor(numpy_image, cv2.COLOR_BGR2GRAY)
+
+    # 可选：进行形态学操作以改善图像质量
+    # 例如，使用腐蚀和膨胀来平滑边界
+    kernel = np.ones((3, 3), np.uint8)
+    numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
+    numpy_image = cv2.dilate(numpy_image, kernel, iterations=1)
+
+    return numpy_image
 def blacken_above_y(mask, y_coord):
     if y_coord < 0 or y_coord >= mask.shape[0]:
         raise ValueError("y_coord is out of the image bounds.")
@@ -117,26 +137,18 @@ def pil_to_tensor_grayscale(pil_image):
     return tensor_image
 #处理为灰度图
 def im_read(face_mask):
-	numpy_image = face_mask.cpu().numpy()
+	numpy_image=face_mask.cpu().numpy()  
 	face_mask_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-
-    # 检查通道数并转换为灰度图像
 	if face_mask_image.shape[0] == 3:
 		face_mask_image = face_mask_image.transpose(1, 2, 0)
+        # 转换为灰度图像
 		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
-	elif face_mask_image.shape[0] == 1:
+	if face_mask_image.shape[0] == 1:
 		face_mask_image = face_mask_image.squeeze(0)
-
-    # 确保图像是单通道的
-	if len(face_mask_image.shape) != 2:
-		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_BGR2GRAY)
-
-    # 应用高斯模糊进行平滑处理
-	face_mask_image = cv2.GaussianBlur(face_mask_image, (5, 5), 0)
-
-    # 应用自适应阈值
-	threshold_image = cv2.adaptiveThreshold(face_mask_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-
+	_, threshold_image = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
+	if len(threshold_image.shape) != 2:
+		threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
+	threshold_image = np.uint8(threshold_image)
 	return threshold_image
 def getMaskBootm(threshold):
 	contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -334,7 +346,7 @@ class BodyMask:
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
 		#获取整个人的蒙版图
-		person_img_mask=im_read(person_mask)
+		person_img_mask=prepare_image(person_mask)
 		cv2.imwrite("/root/autodl-tmp/ComfyUI/input/yt1.png",person_img_mask)
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
