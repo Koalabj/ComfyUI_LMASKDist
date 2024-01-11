@@ -117,18 +117,22 @@ def pil_to_tensor_grayscale(pil_image):
     return tensor_image
 #处理为灰度图
 def im_read(face_mask):
-	numpy_image=face_mask.cpu().numpy()  
+	numpy_image = face_mask.cpu().numpy()
 	face_mask_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
+
+    # 检查通道数并转换为灰度图像
 	if face_mask_image.shape[0] == 3:
 		face_mask_image = face_mask_image.transpose(1, 2, 0)
-        # 转换为灰度图像
 		face_mask_image = cv2.cvtColor(face_mask_image, cv2.COLOR_RGB2GRAY)
-	if face_mask_image.shape[0] == 1:
+	elif face_mask_image.shape[0] == 1:
 		face_mask_image = face_mask_image.squeeze(0)
-	_, threshold_image = cv2.threshold(face_mask_image, 128, 255, cv2.THRESH_BINARY)
-	if len(threshold_image.shape) != 2:
-		threshold_image = cv2.cvtColor(threshold_image, cv2.COLOR_BGR2GRAY)
-	threshold_image = np.uint8(threshold_image)
+
+    # 应用高斯模糊进行平滑处理
+	face_mask_image = cv2.GaussianBlur(face_mask_image, (5, 5), 0)
+
+    # 应用自适应阈值而非普通阈值
+	threshold_image = cv2.adaptiveThreshold(face_mask_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+
 	return threshold_image
 def getMaskBootm(threshold):
 	contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
