@@ -498,24 +498,24 @@ class BodyMask:
 		numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
         # 处理图像
 		height, width, _ = numpy_image.shape
-		threshold=230
+		threshold=220
 		for y in range(height):
 			for x in range(width):
             # 检查是否接近白色
 				if all(numpy_image[y, x] > threshold):
 						numpy_image[y, x] = [255, 255, 255]
-
 		if len(numpy_image.shape) == 2:
-			numpy_image = numpy_image[np.newaxis, ...]
-		else:
-        # 转换数组形状为 CHW
-			numpy_image = np.transpose(numpy_image, (2, 0, 1))
+			numpy_image = numpy_image[:, :, np.newaxis]
+
+		# 转换数组形状为 (C, H, W)
+		numpy_image = np.transpose(numpy_image, (2, 0, 1))
 
 		# 将数组类型转换为浮点数，并标准化到 [0.0, 1.0]
 		numpy_image = numpy_image.astype(np.float32) / 255.0
 
 		# 将 NumPy 数组转换为 PyTorch 张量
 		tensor_image = torch.from_numpy(numpy_image)
+		
 
 
 		return (tensor_image,)
