@@ -540,26 +540,26 @@ class BodyMask:
 		# 反色处理
 		inverted_mask = cv2.bitwise_not(final)
             
-		if len(inverted_mask.shape) == 2 or inverted_mask.shape[2] == 1:
-			inverted_mask = cv2.cvtColor(inverted_mask, cv2.COLOR_GRAY2BGR)
-		result_image = inverted_mask.copy()
+		# if len(inverted_mask.shape) == 2 or inverted_mask.shape[2] == 1:
+		# 	inverted_mask = cv2.cvtColor(inverted_mask, cv2.COLOR_GRAY2BGR)
+		# result_image = inverted_mask.copy()
 
-		# 创建一个黑色掩膜，标记出所有非黑色的像素
-		black_mask = np.all(inverted_mask == [0, 0, 0], axis=-1)
+		# # 创建一个黑色掩膜，标记出所有非黑色的像素
+		# black_mask = np.all(inverted_mask == [0, 0, 0], axis=-1)
 
-		# 创建一个白色掩膜，标记出所有非白色的像素
-		white_mask = np.all(inverted_mask == [255, 255, 255], axis=-1)
+		# # 创建一个白色掩膜，标记出所有非白色的像素
+		# white_mask = np.all(inverted_mask == [255, 255, 255], axis=-1)
 
-		# 标记出所有既非黑色也非白色的像素
-		non_black_white_mask = ~(black_mask | white_mask)
+		# # 标记出所有既非黑色也非白色的像素
+		# non_black_white_mask = ~(black_mask | white_mask)
 
-		# 将非黑非白的像素替换为白色
-		result_image[non_black_white_mask] = [255, 255, 255]
-
-
+		# # 将非黑非白的像素替换为白色
+		# result_image[non_black_white_mask] = [255, 255, 255]
 
 
-		result = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
+
+
+		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # # 反色处理
