@@ -13,7 +13,23 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
-
+def optimize_jagged_edges(image, blur_kernel=(5, 5), morph_kernel=(3, 3)):
+    # 高斯模糊以平滑图像
+    blurred_image = cv2.GaussianBlur(image, blur_kernel, 0)
+    
+    # 二值化处理
+    _, binary_image = cv2.threshold(blurred_image, 127, 255, cv2.THRESH_BINARY)
+    
+    # 形态学操作的内核
+    kernel = np.ones(morph_kernel, np.uint8)
+    
+    # 先腐蚀再膨胀，称为开运算，可以去除小的噪点
+    morph_image = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel)
+    
+    # 再次膨胀后腐蚀，称为闭运算，可以填补小的闭合区域
+    result_image = cv2.morphologyEx(morph_image, cv2.MORPH_CLOSE, kernel)
+    
+    return result_image
 def make_non_black_white(tensor):
     """
     Convert all non-black pixels of an image tensor to white and return the modified image tensor.
@@ -441,13 +457,10 @@ class BodyMask:
 		print(f"顶部坐标{top}")
 		person=cv2.imread(path)
 		person_img = cv2.cvtColor(person, cv2.COLOR_BGR2GRAY)
-		# _, numpy_image = cv2.threshold(person_img, 127, 255, cv2.THRESH_BINARY)
-		# kernel = np.ones((3,3),np.uint8) 
-		# numpy_image = cv2.erode(numpy_image, kernel, iterations=1)
-		# person_img_mask = cv2.dilate(numpy_image, kernel, iterations=1)
-		# path="/root/autodl-tmp/ComfyUI/input/yt2.png"
-		# cv2.imwrite(path,person_img_mask)
-		# person_img_mask=person
+		person_img = optimize_jagged_edges(person_img)
+
+
+
 		# 获取输入的图片
 		pic=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt.png"
@@ -540,21 +553,7 @@ class BodyMask:
 		# 反色处理
 		inverted_mask = cv2.bitwise_not(final)
             
-		# if len(inverted_mask.shape) == 2 or inverted_mask.shape[2] == 1:
-		# 	inverted_mask = cv2.cvtColor(inverted_mask, cv2.COLOR_GRAY2BGR)
-		# result_image = inverted_mask.copy()
-
-		# # 创建一个黑色掩膜，标记出所有非黑色的像素
-		# black_mask = np.all(inverted_mask == [0, 0, 0], axis=-1)
-
-		# # 创建一个白色掩膜，标记出所有非白色的像素
-		# white_mask = np.all(inverted_mask == [255, 255, 255], axis=-1)
-
-		# # 标记出所有既非黑色也非白色的像素
-		# non_black_white_mask = ~(black_mask | white_mask)
-
-		# # 将非黑非白的像素替换为白色
-		# result_image[non_black_white_mask] = [255, 255, 255]
+		
 
 
 
@@ -562,39 +561,7 @@ class BodyMask:
 		result = cv2.cvtColor(inverted_mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
-        # # 反色处理
-		# s = 1.0 - torch_img
         
-		# s1=make_non_black_white(s)
-		# s_copy = s.clone()
-		# numpy_image = s_copy.cpu().numpy()
-		# if numpy_image.ndim == 4:
-        # # 假设是批量处理的图像，取第一个图像
-		# 	numpy_image = numpy_image[0]
-		# if numpy_image.ndim == 3 and numpy_image.shape[0] == 3:
-        # # 正确的 CHW 维度，进行转置
-		# 	numpy_image = np.transpose(numpy_image, (1, 2, 0))
-		# # numpy_image = np.transpose(numpy_image, (1, 2, 0))  # 转换 CHW 到 HWC
-		# numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-        # # 处理图像
-		# height, width, _ = numpy_image.shape
-		# threshold=220
-		# for y in range(height):
-		# 	for x in range(width):
-        #     # 检查是否接近白色
-		# 		if all(numpy_image[y, x] > threshold):
-		# 				numpy_image[y, x] = [255, 255, 255]
-		# if len(numpy_image.shape) == 2:
-		# 	numpy_image = numpy_image[:, :, np.newaxis]
-
-		# # 转换数组形状为 (C, H, W)
-		# numpy_image = np.transpose(numpy_image, (2, 0, 1))
-
-		# # 将数组类型转换为浮点数，并标准化到 [0.0, 1.0]
-		# numpy_image = numpy_image.astype(np.float32) / 255.0
-
-		# # 将 NumPy 数组转换为 PyTorch 张量
-		# tensor_image = torch.from_numpy(numpy_image)
 		
 
 
