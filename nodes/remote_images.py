@@ -192,43 +192,32 @@ def cv2_image_to_tensor(image):
     
     return tensor
 # 膨胀腐蚀
-def erode_and_dilate(tensor, erode_size=5, dilate_size=5):
+def process_image_to_tensor(image_path):
     """
-    Applies erosion followed by dilation on a mask tensor.
+    This function processes an image: it converts an image to a grayscale mask,
+    performs erosion followed by dilation, and returns the result as a tensor.
 
-    Parameters:
-    tensor (numpy.ndarray): A 2D mask tensor (black and white image).
-    erode_size (int): The size of the kernel used for erosion.
-    dilate_size (int): The size of the kernel used for dilation.
-
-    Returns:
-    numpy.ndarray: The tensor after erosion and dilation.
+    :param image_path: Path to the input image.
+    :return: Processed image as a tensor.
     """
-    # Convert the tensor to a format suitable for OpenCV
-    if torch.is_tensor(tensor):
-        image = tensor.cpu().numpy()
-    else:
-        image = tensor
 
-    # Squeeze the tensor to remove the channel dimension if it's 1
-    if image.ndim == 3 and image.shape[0] == 1:
-        image = np.squeeze(image, axis=0)
+    # Read the image in grayscale
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    # Ensure the image is in uint8 format
-    image = (image * 255).astype(np.uint8)
+    # Thresholding to create a binary mask
+    _, mask = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
 
     # Define the kernel for erosion and dilation
-    erode_kernel = np.ones((erode_size, erode_size), np.uint8)
-    dilate_kernel = np.ones((dilate_size, dilate_size), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
 
-    # Apply erosion and dilation
-    eroded_image = cv2.erode(image, erode_kernel, iterations=1)
-    dilated_image = cv2.dilate(eroded_image, dilate_kernel, iterations=1)
+    # Erode and then dilate the mask
+    mask_eroded = cv2.erode(mask, kernel, iterations=1)
+    mask_dilated = cv2.dilate(mask_eroded, kernel, iterations=1)
 
-    # Convert back to a tensor
-    processed_tensor = torch.from_numpy(dilated_image).float()
+    # Convert the processed image to a tensor
+    tensor_output = np.array(mask_dilated)
 
-    return processed_tensor
+    return tensor_output
 
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
@@ -504,7 +493,10 @@ class addImage:
     FUNCTION = "AddImage"
     CATEGORY = "remote"
     def AddImage(self,faceImage):
-        face=erode_and_dilate(faceImage)
+        person=tensor_to_pil(faceImage)
+        path="/root/autodl-tmp/ComfyUI/input/yt1.png"
+        person.save(path)
+        face=process_image_to_tensor(path)
         return (face,)
         
 class BodyMask:
