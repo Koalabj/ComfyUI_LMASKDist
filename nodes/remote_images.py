@@ -205,7 +205,17 @@ def erode_and_dilate(tensor, erode_size=5, dilate_size=5):
     numpy.ndarray: The tensor after erosion and dilation.
     """
     # Convert the tensor to a format suitable for OpenCV
-    image = tensor.cpu().numpy().astype(np.uint8)
+    if torch.is_tensor(tensor):
+        image = tensor.cpu().numpy()
+    else:
+        image = tensor
+
+    # Squeeze the tensor to remove the channel dimension if it's 1
+    if image.ndim == 3 and image.shape[0] == 1:
+        image = np.squeeze(image, axis=0)
+
+    # Ensure the image is in uint8 format
+    image = (image * 255).astype(np.uint8)
 
     # Define the kernel for erosion and dilation
     erode_kernel = np.ones((erode_size, erode_size), np.uint8)
