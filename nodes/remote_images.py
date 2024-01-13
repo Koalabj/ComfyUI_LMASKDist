@@ -496,7 +496,7 @@ class BodyMask:
 	def BodyMaskMake(self,image,body_mask,person_mask):
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
-		head=im_read(Image)
+		head=im_read(image)
 		#获取整个人的蒙版图
 		# person_img_mask=tensor_to_image(person_mask)
 		person=tensor_to_pil(person_mask)
