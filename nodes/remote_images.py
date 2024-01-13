@@ -191,7 +191,34 @@ def cv2_image_to_tensor(image):
     tensor = tensor.unsqueeze(0)
     
     return tensor
+# 膨胀腐蚀
+def erode_and_dilate(tensor, erode_size=5, dilate_size=5):
+    """
+    Applies erosion followed by dilation on a mask tensor.
 
+    Parameters:
+    tensor (numpy.ndarray): A 2D mask tensor (black and white image).
+    erode_size (int): The size of the kernel used for erosion.
+    dilate_size (int): The size of the kernel used for dilation.
+
+    Returns:
+    numpy.ndarray: The tensor after erosion and dilation.
+    """
+    # Convert the tensor to a format suitable for OpenCV
+    image = tensor.cpu().numpy().astype(np.uint8)
+
+    # Define the kernel for erosion and dilation
+    erode_kernel = np.ones((erode_size, erode_size), np.uint8)
+    dilate_kernel = np.ones((dilate_size, dilate_size), np.uint8)
+
+    # Apply erosion and dilation
+    eroded_image = cv2.erode(image, erode_kernel, iterations=1)
+    dilated_image = cv2.dilate(eroded_image, dilate_kernel, iterations=1)
+
+    # Convert back to a tensor
+    processed_tensor = torch.from_numpy(dilated_image).float()
+
+    return processed_tensor
 
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
@@ -458,7 +485,6 @@ class addImage:
      return {
 			"required": {
 				"faceImage": ("IMAGE",),
-				"bodyImage": ("IMAGE",)
 			},
 			"optional": {
 				"image": ("IMAGE",)
@@ -467,12 +493,9 @@ class addImage:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "AddImage"
     CATEGORY = "remote"
-    def AddImage(self,faceImage,bodyImage):
-        face=tensor_to_cv2_image(faceImage)
-        body=tensor_to_cv2_image(bodyImage)
-        result=overlay_images( body,face)
-        torch_img=cv2_image_to_tensor(result)
-        return (torch_img,)
+    def AddImage(self,faceImage):
+        face=erode_and_dilate(faceImage)
+        return (face,)
         
 class BodyMask:
 	def __init__(self):
