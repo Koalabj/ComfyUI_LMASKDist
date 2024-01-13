@@ -207,6 +207,39 @@ def pil_to_tensor_grayscale(pil_image):
     tensor_image = torch.from_numpy(numpy_image)
 
     return tensor_image
+def overlay_images(background_img, overlay_img, position=(0, 0)):
+    """
+    Overlays an image with transparency over another image at a specified position.
+
+    Parameters:
+    background_img (numpy.ndarray): The background image.
+    overlay_img (numpy.ndarray): The overlay image (must have an alpha channel).
+    position (tuple): A tuple (x, y) specifying where the overlay image should be placed on the background.
+
+    Returns:
+    numpy.ndarray: The resulting image after overlay.
+    """
+
+    # Split the overlay image into its RGB and Alpha components
+    overlay_rgb = overlay_img[..., :3]
+    overlay_alpha = overlay_img[..., 3] / 255.0
+
+    # Extract the region of interest (ROI) from the background image where the overlay will be placed
+    x, y = position
+    h, w = overlay_img.shape[:2]
+    roi = background_img[y:y+h, x:x+w]
+
+    # Use the alpha channel as a mask for blending
+    img1_bg = cv2.multiply(1.0 - overlay_alpha[..., np.newaxis], roi)
+    img2_fg = cv2.multiply(overlay_alpha[..., np.newaxis], overlay_rgb)
+
+    # Combine the background and overlay images
+    combined = cv2.add(img1_bg, img2_fg)
+
+    # Place the combined image back into the original image
+    background_img[y:y+h, x:x+w] = combined
+
+    return background_img
 def tensor_to_cv2_image(tensor):
     # 假设 tensor 是一个 numpy 数组
 
@@ -431,7 +464,7 @@ class addImage:
     def AddImage(self,faceImage,bodyImage):
         face=tensor_to_cv2_image(faceImage)
         body=tensor_to_cv2_image(bodyImage)
-        result=cv2.add(face, body)
+        result=overlay_images( body,face)
         torch_img=cv2_image_to_tensor(result)
         return (torch_img,)
         
