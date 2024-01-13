@@ -215,7 +215,7 @@ def tensor_to_cv2_image(tensor):
         tensor = (tensor * 255).astype(np.uint8)
 
     # 如果张量的形状是 [通道数, 高度, 宽度]，转换为 [高度, 宽度, 通道数]
-    if tensor.shape[0] < tensor.shape[1]:  # 这是一个简单的形状检查
+    if len(tensor.shape) == 3 and tensor.shape[0] < tensor.shape[1] and tensor.shape[0] < tensor.shape[2]:
         tensor = np.transpose(tensor, (1, 2, 0))
 
     # 如果张量是 RGB 格式，转换为 BGR 格式
@@ -430,7 +430,7 @@ class addImage:
     CATEGORY = "remote"
     def AddImage(self,faceImage,bodyImage):
         face=tensor_to_cv2_image(faceImage)
-        body=tensor_to_cv2_image(body)
+        body=tensor_to_cv2_image(bodyImage)
         result=cv2.add(face, body)
         torch_img=cv2_image_to_tensor(result)
         return (torch_img,)
