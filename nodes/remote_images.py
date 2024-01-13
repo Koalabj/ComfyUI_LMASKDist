@@ -215,9 +215,9 @@ def process_image_to_tensor(image_path):
     mask_dilated = cv2.dilate(mask_eroded, kernel, iterations=1)
 
     # Convert the processed image to a tensor
-    tensor_output = np.array(mask_dilated)
+    # tensor_output = np.array(mask_dilated)
 
-    return tensor_output
+    return mask_dilated
 
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
@@ -497,7 +497,10 @@ class addImage:
         path="/root/autodl-tmp/ComfyUI/input/yt1.png"
         person.save(path)
         face=process_image_to_tensor(path)
-        return (face,)
+        result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(result)
+        torch_img=pil_to_tensor_grayscale(pil_image)
+        return (torch_img,)
         
 class BodyMask:
 	def __init__(self):
