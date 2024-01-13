@@ -221,8 +221,14 @@ def overlay_images(background_img, overlay_img, position=(0, 0)):
     """
 
     # Split the overlay image into its RGB and Alpha components
-    overlay_rgb = overlay_img[..., :3]
-    overlay_alpha = overlay_img[..., 3] / 255.0
+    if overlay_img.shape[2] == 4:
+        overlay_rgb = overlay_img[..., :3]
+        overlay_alpha = overlay_img[..., 3] / 255.0
+    else:
+        # 如果没有alpha通道，创建一个完全不透明的alpha通道
+        overlay_rgb = overlay_img
+        overlay_alpha = np.ones((overlay_img.shape[0], overlay_img.shape[1]))
+
 
     # Extract the region of interest (ROI) from the background image where the overlay will be placed
     x, y = position
