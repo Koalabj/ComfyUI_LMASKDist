@@ -30,63 +30,7 @@ def optimize_jagged_edges(image, blur_kernel=(5, 5), morph_kernel=(3, 3)):
     result_image = cv2.morphologyEx(morph_image, cv2.MORPH_CLOSE, kernel)
     
     return result_image
-def make_non_black_white(tensor):
-    """
-    Convert all non-black pixels of an image tensor to white and return the modified image tensor.
 
-    Parameters:
-    tensor (torch.Tensor): An image tensor with shape (C, H, W) and pixel values in [0, 1].
-
-    Returns:
-    torch.Tensor: Modified image tensor where all non-black pixels have been changed to white.
-    """
-    tensor = tensor.to(torch.float32)
-    # 检查张量的维度
-    if tensor.ndim == 2:  # 灰度图（无通道维度）
-        tensor = tensor.unsqueeze(0).repeat(3, 1, 1)
-    elif tensor.ndim == 3:
-        if tensor.shape[0] == 1:  # 单通道图
-            tensor = tensor.repeat(3, 1, 1)
-        elif tensor.shape[0] != 3:
-            raise ValueError("Input tensor must have 1 or 3 channels")
-    elif tensor.ndim == 4 and tensor.shape[1] == 3:  # 批处理张量
-        # 这里可以根据需要处理批处理张量
-        tensor = tensor[0]
-        # raise ValueError("Batch tensors are not supported. Please input a single image tensor.")
-    else:
-        raise ValueError("Unsupported tensor format")
-	# 将张量转换为 0 到 1 范围
-    tensor = torch.clamp(tensor, min=0.0, max=1.0)
-
-    # 创建一个与输入张量形状相同的白色张量
-    white_tensor = torch.ones_like(tensor)
-
-    # 寻找所有非黑色像素（即任何通道大于 0 的像素）
-    non_black_mask = tensor.max(dim=0, keepdim=True).values > 0
-
-    # 将非黑色像素替换为白色
-    tensor.masked_scatter_(non_black_mask, white_tensor.masked_select(non_black_mask))
-
-    # # Ensure tensor is on CPU and convert to numpy array
-    # numpy_image = tensor.cpu().numpy()
-
-    # # Check if the tensor is in the expected shape (C, H, W)
-    # if numpy_image.shape[0] != 3:
-    #     raise ValueError("Input tensor must have 3 channels")
-
-    # # Convert to 8-bit format and transpose to HWC for processing
-    # numpy_image = np.transpose(numpy_image, (1, 2, 0))
-    # numpy_image = np.clip(numpy_image * 255, 0, 255).astype(np.uint8)
-
-    # # Find all non-black pixels (any pixel where all RGB values are not 0) and set them to white
-    # mask = np.any(numpy_image != 0, axis=-1)
-    # numpy_image[mask] = [255, 255, 255]
-
-    # # Convert back to CHW format and normalize to [0, 1]
-    # numpy_image = np.transpose(numpy_image, (2, 0, 1)).astype(np.float32) / 255.0
-
-    # Convert back to PyTorch tensor
-    return tensor
 
 #平滑处理二值图
 def tensor_to_image(tensor: torch.Tensor) -> np.array:
@@ -223,6 +167,32 @@ def tensor_to_pil(img_tensor, batch_index=0):
     i = 255. * img_tensor.cpu().numpy()
     img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8).squeeze())
     return img
+
+def cv2_image_to_tensor(image):
+    # 确保图像是三维的
+    if len(image.shape) == 2:
+        # 如果是单通道图像，添加一个新的维度
+        image = image[:, :, np.newaxis]
+    
+    # 转换BGR图像为RGB格式
+    if image.shape[2] == 3:  # 如果有3个通道
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # 转换图像为CHW格式
+    image = image.transpose((2, 0, 1))
+    
+    # 将图像数据类型转换为float，并缩放到[0, 1]范围
+    image = image.astype(np.float32) / 255.0
+    
+    # 将numpy数组转换为torch张量
+    tensor = torch.from_numpy(image)
+    
+    # 添加批次维度
+    tensor = tensor.unsqueeze(0)
+    
+    return tensor
+
+
 def pil_to_tensor_grayscale(pil_image):
     # 将PIL图像转换为NumPy数组
     numpy_image = np.array(pil_image)
@@ -237,6 +207,22 @@ def pil_to_tensor_grayscale(pil_image):
     tensor_image = torch.from_numpy(numpy_image)
 
     return tensor_image
+def tensor_to_cv2_image(tensor):
+    # 假设 tensor 是一个 numpy 数组
+
+    # 如果张量的数据类型是浮点数，将其转换为 [0, 255] 范围内的整数
+    if tensor.dtype == np.float32 or tensor.dtype == np.float64:
+        tensor = (tensor * 255).astype(np.uint8)
+
+    # 如果张量的形状是 [通道数, 高度, 宽度]，转换为 [高度, 宽度, 通道数]
+    if tensor.shape[0] < tensor.shape[1]:  # 这是一个简单的形状检查
+        tensor = np.transpose(tensor, (1, 2, 0))
+
+    # 如果张量是 RGB 格式，转换为 BGR 格式
+    if tensor.shape[2] == 3:
+        tensor = cv2.cvtColor(tensor, cv2.COLOR_RGB2BGR)
+
+    return tensor
 #处理为灰度图
 def im_read(face_mask):
 	numpy_image=face_mask.cpu().numpy()  
@@ -425,6 +411,30 @@ class LoadImageUrl:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
 		return (torch_img,)
+class addImage:
+    def __init__(self):
+      pass
+    @classmethod
+    def INPUT_TYPES(s):
+     return {
+			"required": {
+				"faceImage": ("IMAGE",),
+				"bodyImage": ("IMAGE",)
+			},
+			"optional": {
+				"image": ("IMAGE",)
+			}
+		}
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "AddImage"
+    CATEGORY = "remote"
+    def AddImage(self,faceImage,bodyImage):
+        face=tensor_to_cv2_image(faceImage)
+        body=tensor_to_cv2_image(body)
+        result=cv2.add(face, body)
+        torch_img=cv2_image_to_tensor(result)
+        return (torch_img,)
+        
 class BodyMask:
 	def __init__(self):
 		pass

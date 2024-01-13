@@ -14,6 +14,7 @@ def remote_images():
 	NODE_DISPLAY_NAME_MAPPINGS.update({
 		"LMASKImage": "LMASKImage",
 		"BodyMask":"BodyMask",
+		"addImage":"addImage",
 	})
 
 
