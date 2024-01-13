@@ -80,13 +80,13 @@ def tensor_to_image(tensor: torch.Tensor) -> np.array:
 
     return image
 
-def blacken_above_y(mask, y_coord):
-    if y_coord < 0 or y_coord >= mask.shape[0]:
-        raise ValueError("y_coord is out of the image bounds.")
+# def blacken_above_y(mask, y_coord):
+#     if y_coord < 0 or y_coord >= mask.shape[0]:
+#         raise ValueError("y_coord is out of the image bounds.")
 
-    # 将纵坐标以上的部分设置为黑色
-    mask[:y_coord, :] = 0
-    return mask
+#     # 将纵坐标以上的部分设置为黑色
+#     mask[:y_coord, :] = 0
+#     return mask
 
 def create_smooth_bezier_polygon(mask):
 
@@ -496,6 +496,7 @@ class BodyMask:
 	def BodyMaskMake(self,image,body_mask,person_mask):
 		# 获取衣服的蒙版图
 		body=im_read(body_mask)
+		head=im_read(Image)
 		#获取整个人的蒙版图
 		# person_img_mask=tensor_to_image(person_mask)
 		person=tensor_to_pil(person_mask)
@@ -511,90 +512,90 @@ class BodyMask:
 
 
 		# 获取输入的图片
-		pic=tensor_to_pil(image)
-		path="/root/autodl-tmp/ComfyUI/input/yt.png"
-		pic.save(path)
+		# pic=tensor_to_pil(image)
+		# path="/root/autodl-tmp/ComfyUI/input/yt.png"
+		# pic.save(path)
 
-		original_img = cv2.imread(path)
-		gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-		_, img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+		# original_img = cv2.imread(path)
+		# gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+		# _, img = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
 
 		
 		
-		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/face_yolov8m-seg_60.pt')
-    	# Run inference on an image
-		results = model(source=path, mode='val')  # results list
-    	# View results
-		for r in results:
-			face_zuobiao_masks = r.masks
+		# model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/face_yolov8m-seg_60.pt')
+    	# # Run inference on an image
+		# results = model(source=path, mode='val')  # results list
+    	# # View results
+		# for r in results:
+		# 	face_zuobiao_masks = r.masks
 
-		face_img_mask = np.ones_like(img)
-		max_y_coordinate_face = -np.inf 
-		if face_zuobiao_masks != None:
-        # 找出每个检测框
-			face_zuobiao = face_zuobiao_masks.xy
-			for item in face_zuobiao:
-				points = np.array(item, dtype=np.int32)
-				# 将轮廓列表转换为多维数组格式
-				contours_a = np.array([points])
-			cv2.fillPoly(face_img_mask, contours_a, (255, 255, 255))
-            # 找到脸部的最低端坐标(找到 y 轴坐标最大的坐标点)
-			y_coordinate = max(item[:, 1])
-			if y_coordinate > max_y_coordinate_face:
-				max_y_coordinate_face = y_coordinate
-			print(f"脸部y最低坐标：{max_y_coordinate_face}")
-			print('人脸填充完毕')	
-		else:
-			print('未检测到物体，固未填充')
+		# face_img_mask = np.ones_like(img)
+		# max_y_coordinate_face = -np.inf 
+		# if face_zuobiao_masks != None:
+        # # 找出每个检测框
+		# 	face_zuobiao = face_zuobiao_masks.xy
+		# 	for item in face_zuobiao:
+		# 		points = np.array(item, dtype=np.int32)
+		# 		# 将轮廓列表转换为多维数组格式
+		# 		contours_a = np.array([points])
+		# 	cv2.fillPoly(face_img_mask, contours_a, (255, 255, 255))
+        #     # 找到脸部的最低端坐标(找到 y 轴坐标最大的坐标点)
+		# 	y_coordinate = max(item[:, 1])
+		# 	if y_coordinate > max_y_coordinate_face:
+		# 		max_y_coordinate_face = y_coordinate
+		# 	print(f"脸部y最低坐标：{max_y_coordinate_face}")
+		# 	print('人脸填充完毕')	
+		# else:
+		# 	print('未检测到物体，固未填充')
 		
-		hair_img_mask = None
-		model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/best_hair_117_epoch_v4.pt')
-		results = model(source=path, mode='val')  # results list
-		for r in results:
-			hair_zuobiao_masks = r.masks
-        	# 把检测到的所有边界框的四个坐标拿出来
-			bbox_zuobiao = r.boxes.xyxy.cpu().numpy()
-		left_top_zuobiao = bbox_zuobiao[:, 1]
-		# 增加校验
-		if left_top_zuobiao is None or len(left_top_zuobiao) == 0:
-			print('未检测到物体，固未填充')
-		else:
-			max_index = np.argmin(left_top_zuobiao)
-			max_value = left_top_zuobiao[max_index]
-			hair_img_mask = np.zeros_like(img)
-			if hair_zuobiao_masks != None:
-				hair_zuobiao = hair_zuobiao_masks.xy
-				item = hair_zuobiao[max_index]
-				points = np.array(item, dtype=np.int32)
-        		# 将轮廓列表转换为多维数组格式
-				contours_a = np.array([points])
-				cv2.fillPoly(hair_img_mask, contours_a, (255, 255, 255))
-				# 找到头发的最低端坐标
-				max_y_coordinate_hair = item[np.argmax(item[:, 1])]
-				print('头发填充完毕')
-			else:
-				print('未检测到物体，固未填充')
+		# hair_img_mask = None
+		# model = YOLO(task='segment',model='/root/autodl-tmp/ComfyUI/models/ultralytics/segm/best_hair_117_epoch_v4.pt')
+		# results = model(source=path, mode='val')  # results list
+		# for r in results:
+		# 	hair_zuobiao_masks = r.masks
+        # 	# 把检测到的所有边界框的四个坐标拿出来
+		# 	bbox_zuobiao = r.boxes.xyxy.cpu().numpy()
+		# left_top_zuobiao = bbox_zuobiao[:, 1]
+		# # 增加校验
+		# if left_top_zuobiao is None or len(left_top_zuobiao) == 0:
+		# 	print('未检测到物体，固未填充')
+		# else:
+		# 	max_index = np.argmin(left_top_zuobiao)
+		# 	max_value = left_top_zuobiao[max_index]
+		# 	hair_img_mask = np.zeros_like(img)
+		# 	if hair_zuobiao_masks != None:
+			# 	hair_zuobiao = hair_zuobiao_masks.xy
+			# 	item = hair_zuobiao[max_index]
+			# 	points = np.array(item, dtype=np.int32)
+        	# 	# 将轮廓列表转换为多维数组格式
+			# 	contours_a = np.array([points])
+			# 	cv2.fillPoly(hair_img_mask, contours_a, (255, 255, 255))
+			# 	# 找到头发的最低端坐标
+			# 	max_y_coordinate_hair = item[np.argmax(item[:, 1])]
+			# 	print('头发填充完毕')
+			# else:
+			# 	print('未检测到物体，固未填充')
 		
 		# 头发+脸部的蒙版
-		if hair_img_mask is not None:
-			hair_face_img = cv2.add(hair_img_mask, face_img_mask)
-		else:
-			hair_face_img=face_img_mask
+		# if hair_img_mask is not None:
+		# 	hair_face_img = cv2.add(hair_img_mask, face_img_mask)
+		# else:
+		# 	hair_face_img=face_img_mask
         
-		path="/root/autodl-tmp/ComfyUI/input/yt3.png"
-		cv2.imwrite(path,hair_face_img)
-		hair_face_img1=cv2.imread(path)
-		hair_face_img1 = cv2.cvtColor(hair_face_img1, cv2.COLOR_BGR2GRAY)
+		# path="/root/autodl-tmp/ComfyUI/input/yt3.png"
+		# cv2.imwrite(path,hair_face_img)
+		# hair_face_img1=cv2.imread(path)
+		# hair_face_img1 = cv2.cvtColor(hair_face_img1, cv2.COLOR_BGR2GRAY)
 
 		# 使用全身照减去头部
-		final_img = cv2.subtract(person_img, hair_face_img1)
+		final_img = cv2.subtract(person_img, head)
 		# 计算最低点坐标
 		# 临时测试
 		bootm=0
-		if(top>max_y_coordinate_face):
-			bootm=max_y_coordinate_face
-		else:
-			bootm=top
+		# if(top>max_y_coordinate_face):
+		# 	bootm=max_y_coordinate_face
+		# else:
+		bootm=top
 		
 		final_img1=np.copy(final_img)
 		print(f"计算的最低点坐标为{bootm}")
