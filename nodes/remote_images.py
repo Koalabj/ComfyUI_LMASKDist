@@ -500,10 +500,11 @@ class exImage:
         result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(result)
         torch_img=pil_to_tensor_grayscale(pil_image)
-        print(f"张量通道：{torch_img.shape[0]}")
-        alpha_channel = torch.ones((1, torch_img.shape[1], torch_img.shape[2]))
+        shapes=len(torch_img.shape)
+        print(f"张量形状：{shapes}")
+        alpha_channel = torch_img.unsqueeze(0)
 
-        return (torch.cat((torch_img, alpha_channel), dim=0),)
+        return (alpha_channel,)
 class addImage:
     def __init__(self):
       pass
