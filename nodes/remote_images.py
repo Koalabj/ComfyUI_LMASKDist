@@ -501,7 +501,9 @@ class exImage:
         pil_image = Image.fromarray(result)
         torch_img=pil_to_tensor_grayscale(pil_image)
         print(f"张量通道：{torch_img.shape[0]}")
-        return (torch_img,)
+        alpha_channel = torch.ones((1, torch_img.shape[1], torch_img.shape[2]))
+
+        return (torch.cat((torch_img, alpha_channel), dim=0),)
 class addImage:
     def __init__(self):
       pass
