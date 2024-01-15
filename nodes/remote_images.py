@@ -499,8 +499,8 @@ class exImage:
         face=process_image_to_tensor(path)
         result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         img = result.astype(np.float32)
-        # img = np.transpose(img, (2, 0, 1))
-        # img = np.expand_dims(img, axis=0)
+        img = np.transpose(img, (2, 0, 1))
+        img = np.expand_dims(img, axis=0)
 
         print(f"+++++张量前形状：{img.shape}")
         tensor = torch.from_numpy(img)
