@@ -499,7 +499,7 @@ class exImage:
         face=process_image_to_tensor(path)
         result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(result)
-        torch_img=pil_to_tensor_grayscale(pil_image)
+        torch_img=pil_to_tensor(pil_image)
         print(f"+++++张量形状：{torch_img.shape}")
         alpha_channel = torch_img.unsqueeze(0)
 
