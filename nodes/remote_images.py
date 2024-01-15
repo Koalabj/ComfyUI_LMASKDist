@@ -505,7 +505,7 @@ class exImage:
         print(f"+++++张量形状：{img.shape}")
         tensor = torch.from_numpy(img)
 
-        return (img,)
+        return (tensor,)
 class addImage:
     def __init__(self):
       pass
