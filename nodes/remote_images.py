@@ -476,6 +476,32 @@ class LoadImageUrl:
 		torch_img=pil_to_tensor_grayscale(pil_image)
         # 转换为PyTorch张量
 		return (torch_img,)
+class exImage:
+    def __init__(self):
+      pass
+    @classmethod
+    def INPUT_TYPES(s):
+     return {
+			"required": {
+				"faceImage": ("IMAGE",),
+			},
+			"optional": {
+				"image": ("IMAGE",)
+			}
+		}
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "AddImage"
+    CATEGORY = "remote"
+    def AddImage(self,faceImage):
+        person=tensor_to_pil(faceImage)
+        path="/root/autodl-tmp/ComfyUI/input/yt1.png"
+        person.save(path)
+        face=process_image_to_tensor(path)
+        result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        result = np.expand_dims(result, axis=0)
+        pil_image = Image.fromarray(result)
+        torch_img=pil_to_tensor_grayscale(pil_image)
+        return (torch_img,)
 class addImage:
     def __init__(self):
       pass
