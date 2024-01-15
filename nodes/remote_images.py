@@ -578,7 +578,9 @@ class BodyMask:
 		kernel = np.ones((5, 5), np.uint8)
 		eroded_mask = cv2.erode(combined_mask, kernel, iterations=1)
 		dilated_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
-
+        
+		path="/root/autodl-tmp/ComfyUI/input/yt4.png"
+		cv2.imwrite(path,dilated_mask)
 
 		# 获取输入的图片
 		pic=tensor_to_pil(source_image)
