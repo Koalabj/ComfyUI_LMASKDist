@@ -498,12 +498,14 @@ class exImage:
         person.save(path)
         face=process_image_to_tensor(path)
         result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-        pil_image = Image.fromarray(result)
-        torch_img=pil_to_tensor(pil_image)
-        print(f"+++++张量形状：{torch_img.shape}")
-        alpha_channel = torch_img.unsqueeze(0)
+        img = result.astype(np.float32)
+        img = np.transpose(img, (2, 0, 1))
+        img = np.expand_dims(img, axis=0)
 
-        return (alpha_channel,)
+        print(f"+++++张量形状：{img.shape}")
+        tensor = torch.from_numpy(img)
+
+        return (img,)
 class addImage:
     def __init__(self):
       pass
