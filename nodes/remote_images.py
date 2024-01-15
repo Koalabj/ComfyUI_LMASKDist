@@ -568,10 +568,16 @@ class BodyMask:
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
+		body20=blacken_below_y(body,top+200)
 		person=cv2.imread(path)
 		person_img = cv2.cvtColor(person, cv2.COLOR_BGR2GRAY)
 		person_img = optimize_jagged_edges(person_img)
-
+		person_img20=blacken_below_y(person_img,top+200);
+		
+		combined_mask = cv2.bitwise_or(body20, person_img20)
+		kernel = np.ones((5, 5), np.uint8)
+		eroded_mask = cv2.erode(combined_mask, kernel, iterations=1)
+		dilated_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
 
 
 		# 获取输入的图片
@@ -651,8 +657,8 @@ class BodyMask:
 		hair_face_img1 = cv2.cvtColor(hair_face_img1, cv2.COLOR_BGR2GRAY)
 
 		# 使用全身照减去头部
-		# final_img0 = cv2.subtract(person_img, head)
-		final_img=cv2.subtract(person_img,hair_face_img1)
+		final_img0 = cv2.subtract(person_img, dilated_mask)
+		final_img=cv2.subtract(final_img0,head)
 		# 计算最低点坐标
 		# 临时测试
 		bootm=0
