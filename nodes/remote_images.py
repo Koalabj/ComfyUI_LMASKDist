@@ -428,7 +428,7 @@ def borad_pz(expanded_mask, contour):
 
 
 def pil_to_tensor(source_image):
-    image = Image.fromarray(np.clip(255. * source_image.cpu().numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
+    image = Image.fromarray(np.clip(255. * source_image.numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
     return image
 class LoadImageUrl:
 	def __init__(self):
