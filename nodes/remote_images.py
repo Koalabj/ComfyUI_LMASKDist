@@ -505,6 +505,9 @@ class exImage:
         channel = tensor[:, 0, :, :]
         mask = channel > 128
         maskTensor=mask.float()
+        squeezed_mask_tensor = maskTensor.squeeze()
+
+        print(f"+++++mask形状：{squeezed_mask_tensor.shape}")
 
         return (tensor,maskTensor)
 class addImage:
