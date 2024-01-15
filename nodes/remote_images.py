@@ -568,13 +568,13 @@ class BodyMask:
 		#获取衣服蒙版的定坐标
 		top=getMaskTop(body)
 		print(f"顶部坐标{top}")
-		body20=blacken_below_y(body,top+200)
+		body20=blacken_below_y(cv2.copy(body),top+200)
 		person=cv2.imread(path)
 		person_img = cv2.cvtColor(person, cv2.COLOR_BGR2GRAY)
 		person_img = optimize_jagged_edges(person_img)
-		person_img20=blacken_below_y(person_img,top+200);
+		person_img20=blacken_below_y(cv2.copy(person_img),top+200);
 		
-		combined_mask = cv2.bitwise_or(body20, person_img20)
+		combined_mask = cv2.bitwise_xor(body20, person_img20)
 		kernel = np.ones((5, 5), np.uint8)
 		eroded_mask = cv2.erode(combined_mask, kernel, iterations=1)
 		dilated_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
