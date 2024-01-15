@@ -485,11 +485,8 @@ class exImage:
 			"required": {
 				"faceImage": ("IMAGE",),
 			},
-			"optional": {
-				"image": ("IMAGE",)
-			}
 		}
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ("IMAGE","MASK")
     FUNCTION = "AddImage"
     CATEGORY = "remote"
     def AddImage(self,faceImage):
@@ -505,7 +502,11 @@ class exImage:
         print(f"+++++张量前形状：{img.shape}")
         tensor = torch.from_numpy(img)
         print(f"+++++张量形状：{tensor.shape}")
-        return (tensor,)
+        channel = tensor[:, 0, :, :]
+        mask = channel > 128
+        maskTensor=mask.float()
+
+        return (tensor,maskTensor)
 class addImage:
     def __init__(self):
       pass
