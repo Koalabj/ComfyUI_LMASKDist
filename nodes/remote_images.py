@@ -651,8 +651,8 @@ class BodyMask:
 		hair_face_img1 = cv2.cvtColor(hair_face_img1, cv2.COLOR_BGR2GRAY)
 
 		# 使用全身照减去头部
-		final_img0 = cv2.subtract(person_img, head)
-		final_img=cv2.subtract(final_img0,hair_face_img1)
+		# final_img0 = cv2.subtract(person_img, head)
+		final_img=cv2.subtract(person_img,hair_face_img1)
 		# 计算最低点坐标
 		# 临时测试
 		bootm=0
