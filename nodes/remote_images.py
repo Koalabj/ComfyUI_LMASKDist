@@ -498,7 +498,6 @@ class exImage:
         person.save(path)
         face=process_image_to_tensor(path)
         result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-        result = np.expand_dims(result, axis=0)
         pil_image = Image.fromarray(result)
         torch_img=pil_to_tensor_grayscale(pil_image)
         return (torch.cat(torch_img, dim=0),)
