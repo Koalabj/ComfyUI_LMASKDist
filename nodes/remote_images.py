@@ -208,7 +208,7 @@ def process_image_to_tensor(image_path):
     _, mask = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
 
     # Define the kernel for erosion and dilation
-    kernel = np.ones((5, 5), np.uint8)
+    kernel = np.ones((35, 35), np.uint8)
 
     # Erode and then dilate the mask
     mask_eroded = cv2.erode(mask, kernel, iterations=1)
