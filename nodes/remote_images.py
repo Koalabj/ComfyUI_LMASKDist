@@ -13,6 +13,27 @@ import math
 from ultralytics import YOLO
 from torchvision.transforms import ToPILImage
 from torchvision import transforms
+# 找到最上面的白色区域  将其他的全部涂黑
+def addutl(mask):
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+    	# 假设最上面的轮廓是第一个轮廓
+        top_contour = contours[0]
+        # 遍历所有轮廓，找到最上面的一个
+        for contour in contours:
+            if cv2.boundingRect(contour)[1] < cv2.boundingRect(top_contour)[1]:
+               top_contour = contour
+        
+        top_mask=np.zeros_like(mask)
+        cv2.drawContours(top_mask, [top_contour], -1, (255), thickness=cv2.FILLED)
+    else:
+         top_mask = np.zeros_like(mask)
+    return top_mask
+
+    	
+        
+
+    # 创建一个全黑的蒙版
 def optimize_jagged_edges(image, blur_kernel=(5, 5), morph_kernel=(3, 3)):
     # 高斯模糊以平滑图像
     blurred_image = cv2.GaussianBlur(image, blur_kernel, 0)
@@ -208,7 +229,7 @@ def process_image_to_tensor(image_path):
     _, mask = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
 
     # Define the kernel for erosion and dilation
-    kernel = np.ones((35, 35), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
 
     # Erode and then dilate the mask
     mask_eroded = cv2.erode(mask, kernel, iterations=1)
@@ -531,7 +552,8 @@ class addImage:
         path="/root/autodl-tmp/ComfyUI/input/yt1.png"
         person.save(path)
         face=process_image_to_tensor(path)
-        result = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        face1=addutl(face)
+        result = cv2.cvtColor(face1, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(result)
         torch_img=pil_to_tensor_grayscale(pil_image)
         return (torch_img,)
