@@ -29,9 +29,23 @@ def addutl(mask):
     else:
          top_mask = np.zeros_like(mask)
     return top_mask
-
-    	
-        
+# 黑白蒙版图 下面最大面积的黑色区域保留  其他的区域全部变成白色
+def clearblack(mask):
+	contours, _ = cv2.findContours(255 - mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	# 初始化一个变量来保存最大面积的轮廓
+	max_area_contour = None
+	max_area = 0
+	# 遍历所有轮廓，找到面积最大的一个
+	for contour in contours:
+		area = cv2.contourArea(contour)
+		if area > max_area:
+			max_area = area
+			max_area_contour = contour
+	# 创建一个全白的蒙版
+	new_mask = np.ones_like(mask) * 255	
+	if max_area_contour is not None:
+		cv2.drawContours(new_mask, [max_area_contour], -1, (0), thickness=cv2.FILLED)
+	return new_mask    
 
     # 创建一个全黑的蒙版
 def optimize_jagged_edges(image, blur_kernel=(5, 5), morph_kernel=(3, 3)):
@@ -531,6 +545,30 @@ class exImage:
         print(f"+++++mask形状：{squeezed_mask_tensor.shape}")
 
         return (tensor,maskTensor)
+class clearBlackMask:
+    def __init__(self):
+      pass
+    @classmethod
+    def INPUT_TYPES(s):
+     return {
+			"required": {
+				"image": ("IMAGE",),
+			}
+		}
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "clearBlackMask"
+    CATEGORY = "remote"
+    def clearBlackMask(self,image):
+        person=tensor_to_pil(image)
+        path="/root/autodl-tmp/ComfyUI/input/yt1.png"
+        person.save(path)
+        face=process_image_to_tensor(path)
+        face1=clearblack(face)
+        result = cv2.cvtColor(face1, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(result)
+        torch_img=pil_to_tensor_grayscale(pil_image)
+        return (torch_img,)
+        
 class addImage:
     def __init__(self):
       pass
