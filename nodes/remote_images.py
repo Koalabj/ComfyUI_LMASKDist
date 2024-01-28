@@ -568,7 +568,37 @@ class clearBlackMask:
         pil_image = Image.fromarray(result)
         torch_img=pil_to_tensor_grayscale(pil_image)
         return (torch_img,)
-        
+class MaskLoadUrl:
+	def __init__(self):
+		pass
+
+	@classmethod
+	def INPUT_TYPES(s):
+		return {
+			"required": {
+				"url": ("STRING", { "multiline": False, })
+			}
+		}
+
+	RETURN_TYPES = ("IMAGE", "MASK")
+	FUNCTION = "load_image_url"
+	CATEGORY = "remote"
+	def MaskLoadUrl(self, url):
+		with requests.get(url, stream=True) as r:
+			r.raise_for_status()
+			i = Image.open(r.raw)
+		image = i.convert("RGBA")
+		image = np.array(image).astype(np.float32) / 255.0
+		image = torch.from_numpy(image)[None,]
+		print(f"模式：{i.mode}")
+
+		if 'A' in i.getbands():
+			mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+			mask = 1. - torch.from_numpy(mask)
+		else:
+			mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
+		return (image, mask)
+		
 class addImage:
     def __init__(self):
       pass
