@@ -590,7 +590,7 @@ class MaskLoadUrl:
 		image = i.convert("RGBA")
 		image = np.array(image).astype(np.float32) / 255.0
 		image = torch.from_numpy(image)[None,]
-		print(f"模式：{i.mode}")
+		print(f"模式：{i.getbands()}")
 
 		if 'A' in i.getbands():
 			mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
