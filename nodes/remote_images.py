@@ -587,8 +587,8 @@ class MaskLoadUrl:
 		with requests.get(url, stream=True) as r:
 			r.raise_for_status()
 			i = Image.open(r.raw)
-		print(f"图片格式{i.shape}")
-		image = i.convert("RGBA")
+		# print(f"图片格式{i.shape}")
+		# image = i.convert("RGBA")
 		image = np.array(image).astype(np.float32) / 255.0
 		image = torch.from_numpy(image)[None,]
 		print(f"模式：{i.getbands()}")
