@@ -580,7 +580,7 @@ class MaskLoadUrl:
 			}
 		}
 
-	RETURN_TYPES = ("IMAGE", "MASK")
+	RETURN_TYPES = ( "MASK",)
 	FUNCTION = "MaskLoadUrl"
 	CATEGORY = "remote"
 	def MaskLoadUrl(self, url):
@@ -589,8 +589,8 @@ class MaskLoadUrl:
 			i = Image.open(r.raw)
 		# print(f"图片格式{i.shape}")
 		# image = i.convert("RGBA")
-		image = np.array(image).astype(np.float32) / 255.0
-		image = torch.from_numpy(image)[None,]
+		# image = np.array(image).astype(np.float32) / 255.0
+		# image = torch.from_numpy(image)[None,]
 		print(f"模式：{i.getbands()}")
 
 		if 'A' in i.getbands():
@@ -598,7 +598,7 @@ class MaskLoadUrl:
 			mask = 1. - torch.from_numpy(mask)
 		else:
 			mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
-		return (image, mask)
+		return (mask,)
 		
 class addImage:
     def __init__(self):
