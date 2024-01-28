@@ -588,13 +588,13 @@ class MaskLoadUrl:
 			r.raise_for_status()
 			i = Image.open(r.raw)
 		# print(f"图片格式{i.shape}")
-		# image = i.convert("RGBA")
+		image = i.convert("RGBA")
 		# image = np.array(image).astype(np.float32) / 255.0
 		# image = torch.from_numpy(image)[None,]
-		print(f"模式：{i.getbands()}")
+		print(f"模式：{image.getbands()}")
 
-		if 'A' in i.getbands():
-			mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+		if 'A' in image.getbands():
+			mask = np.array(image.getchannel('A')).astype(np.float32) / 255.0
 			mask = 1. - torch.from_numpy(mask)
 		else:
 			mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
