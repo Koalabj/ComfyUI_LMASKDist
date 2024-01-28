@@ -581,7 +581,7 @@ class MaskLoadUrl:
 		}
 
 	RETURN_TYPES = ("IMAGE", "MASK")
-	FUNCTION = "load_image_url"
+	FUNCTION = "MaskLoadUrl"
 	CATEGORY = "remote"
 	def MaskLoadUrl(self, url):
 		with requests.get(url, stream=True) as r:
