@@ -620,7 +620,7 @@ class ecImage:
 		person=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/input/yt1.jpg"
 		person.save(path)
-		mask = cv2.imread('path', cv2.IMREAD_GRAYSCALE)  # 以灰度模式加载
+		mask = cv2.imread(path, cv2.IMREAD_GRAYSCALE)  # 以灰度模式加载
 		kernel_size = 40  # 核的大小
 		kernel = np.ones((kernel_size, kernel_size), np.uint8)
 		dilated = cv2.dilate(mask, kernel, iterations=1)
