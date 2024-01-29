@@ -594,12 +594,43 @@ class MaskLoadUrl:
 		print(f"模式：{image.getbands()}")
 
 		if 'A' in image.getbands():
-			mask = np.array(image.getchannel('A')).astype(np.float32) / 255.0
+			mask = np.array(iimage.getchannel('A')).astype(np.float32) / 255.0
 			mask = 1. - torch.from_numpy(mask)
 		else:
 			mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
 		return (mask,)
-		
+# 对黑白蒙版图进行膨胀腐蚀
+class ecImage:
+	def __init__(self):
+		pass
+	@classmethod
+	def INPUT_TYPES(s):
+		return {
+			"required": {
+				"image": ("IMAGE",),
+			},
+			"optional": {
+				"image": ("IMAGE",)
+			}
+		}
+	RETURN_TYPES = ("IMAGE",)
+	FUNCTION = "ecImage"
+	CATEGORY = "remote"
+	def ecImage(self,image):
+		person=tensor_to_pil(image)
+		path="/root/autodl-tmp/ComfyUI/input/yt1.jpg"
+		person.save(path)
+		mask = cv2.imread('path', cv2.IMREAD_GRAYSCALE)  # 以灰度模式加载
+		kernel_size = 40  # 核的大小
+		kernel = np.ones((kernel_size, kernel_size), np.uint8)
+		dilated = cv2.dilate(mask, kernel, iterations=1)
+
+		# 在膨胀的结果上进行腐蚀操作
+		eroded = cv2.erode(dilated, kernel, iterations=1)
+		result = cv2.cvtColor(eroded, cv2.COLOR_BGR2RGB)
+		pil_image = Image.fromarray(result)
+		torch_img=pil_to_tensor_grayscale(pil_image)
+		return (torch_img,)
 class addImage:
     def __init__(self):
       pass
