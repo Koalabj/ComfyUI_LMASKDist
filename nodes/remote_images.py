@@ -594,7 +594,7 @@ class MaskLoadUrl:
 		print(f"模式：{image.getbands()}")
 
 		if 'A' in image.getbands():
-			mask = np.array(iimage.getchannel('A')).astype(np.float32) / 255.0
+			mask = np.array(image.getchannel('A')).astype(np.float32) / 255.0
 			mask = 1. - torch.from_numpy(mask)
 		else:
 			mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
