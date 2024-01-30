@@ -535,7 +535,7 @@ class ImageCImage:
 	RETURN_TYPES = ("IMAGE",)
 	FUNCTION = "ImageCImage"
 	CATEGORY = "remote"
-	def load_image_url(self, face_mask,head_mask):
+	def ImageCImage(self, face_mask,head_mask):
 		face=tensor_to_pil(face_mask)
 		path="/root/autodl-tmp/ComfyUI/tests/img/a.png"
 		face.save(path)

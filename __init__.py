@@ -6,7 +6,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 def remote_images():
 	global NODE_CLASS_MAPPINGS
 	global NODE_DISPLAY_NAME_MAPPINGS
-	from .nodes.remote_images import LoadImageUrl,BodyMask,addImage,exImage,clearBlackMask,MaskLoadUrl,ecImage
+	from .nodes.remote_images import LoadImageUrl,BodyMask,addImage,exImage,clearBlackMask,MaskLoadUrl,ecImage,ImageCImage
 	NODE_CLASS_MAPPINGS.update({
 		"LMASKImage": LoadImageUrl,
 		"BodyMask":BodyMask,
@@ -14,7 +14,8 @@ def remote_images():
 		"exImage":exImage,
 		"clearBlackMask":clearBlackMask,
 		"MaskLoadUrl":MaskLoadUrl,
-		"ecImage":ecImage
+		"ecImage":ecImage,
+		"ImageCImage":ImageCImage
 	})
 	NODE_DISPLAY_NAME_MAPPINGS.update({
 		"LMASKImage": "LMASKImage",
@@ -23,7 +24,8 @@ def remote_images():
 		"exImage":"exImage",
 		"clearBlackMask":"clearBlackMask",
 		"MaskLoadUrl":"MaskLoadUrl",
-		"ecImage":"ecImage"
+		"ecImage":"ecImage",
+		"ImageCImage":"ImageCImage"
 	})
 
 
