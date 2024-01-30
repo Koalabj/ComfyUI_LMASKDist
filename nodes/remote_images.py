@@ -465,6 +465,111 @@ def borad_pz(expanded_mask, contour):
 def pil_to_tensor(source_image):
     image = Image.fromarray(np.clip(255. * source_image.numpy(), 0, 255).astype(np.uint8)).convert('RGBA')
     return image
+
+def save_mask(mask, filename):
+  
+  # 判断维度
+  dims = mask.ndim
+  
+  if dims == 2:
+    
+    # 二维直接保存
+    cv2.imwrite(filename, mask)
+    
+  elif dims == 3: 
+    
+    # 三维先提取第一帧
+    mask2d = mask[:,:] 
+    
+    # 二值化
+    ret, mask2d = cv2.threshold(mask2d, 0, 1, cv2.THRESH_BINARY)
+    
+    # 保存转换后的二维
+    cv2.imwrite(filename, mask2d*255)
+    
+  else:
+    print("Mask dimension not supported")
+
+def keep_bottom_white(image_path):
+
+  # 读取图像
+  img = cv2.imread(image_path)
+
+  # 转灰度
+  gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+  # 二值化
+  ret, mask = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+  # 其余处理同上一个版本
+  contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  
+
+  max_y = 0
+  roi_contour = None  
+  for contour in contours:
+    x,y,w,h = cv2.boundingRect(contour)
+    if y+h > max_y:  
+      max_y = y+h
+      roi_contour = contour
+      
+  mask[:] = 0
+  cv2.drawContours(mask, [roi_contour], -1, 255, -1)
+
+  return mask
+class ImageCImage:
+	def __init__(self):
+		pass
+
+	@classmethod
+	def INPUT_TYPES(s):
+		return {
+			"required": {
+				"face_mask": ("IMAGE",),
+				"head_mask": ("IMAGE",)
+			},
+            "optional": {
+                "image": ("IMAGE",)
+            }
+		}
+
+	RETURN_TYPES = ("IMAGE",)
+	FUNCTION = "ImageCImage"
+	CATEGORY = "remote"
+	def load_image_url(self, face_mask,head_mask):
+		face=tensor_to_pil(face_mask)
+		path="/root/autodl-tmp/ComfyUI/tests/img/a.png"
+		face.save(path)
+		head=tensor_to_pil(head_mask)
+		path1="/root/autodl-tmp/ComfyUI/tests/img/b.png"
+		head.save(path1)
+		a = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+		b = cv2.imread(path1, cv2.IMREAD_GRAYSCALE)
+        # 定义膨胀和腐蚀的核
+		kernel_20 = np.ones((20, 20), np.uint8)
+		kernel_40 = np.ones((30, 30), np.uint8)
+        # 步骤 1: 预处理 a 和 b
+		a_processed = cv2.erode(cv2.dilate(a, kernel_20), kernel_20)
+		b_processed = cv2.erode(cv2.dilate(b, kernel_20), kernel_20)
+        # 步骤 2: 从 b 中去除 a
+		b_minus_a = cv2.bitwise_and(b_processed, cv2.bitwise_not(a_processed))
+        # 步骤 3: 腐蚀 b - a 的结果
+		eroded = cv2.erode(b_minus_a, kernel_40)
+		cv2.imwrite('/root/autodl-tmp/ComfyUI/tests/img/c.png', eroded)
+		save_mask(eroded,'/root/autodl-tmp/ComfyUI/tests/img/c.png')
+		final_mask=keep_bottom_white("/root/autodl-tmp/ComfyUI/tests/img/c.png")
+        # 步骤 7: 膨胀操作
+		dilated = cv2.dilate(final_mask, kernel_40)
+
+		# 在将 a 加回之前，去除 a 中与 b_minus_a 相交的部分
+		a_adjusted = cv2.bitwise_and(a_processed, cv2.bitwise_not(b_minus_a))
+
+		# 步骤 8: 将调整后的 a 加回到最终结果
+		final_result = cv2.bitwise_or(dilated, a_adjusted)
+		result = cv2.cvtColor(final_result, cv2.COLOR_BGR2RGB)
+		pil_image = Image.fromarray(result)
+		torch_img=pil_to_tensor_grayscale(pil_image)
+		return (torch_img,)
+
 class LoadImageUrl:
 	def __init__(self):
 		pass
