@@ -562,7 +562,7 @@ class UDEImage:
 		face=tensor_to_pil(image)
 		path="/root/autodl-tmp/ComfyUI/tests/img/a.png"
 		face.save(path)
-		mask=upside_down_expansion(path,amount,amount,amount)
+		mask=upside_down_expansion(path,amount)
 		result = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
 		pil_image = Image.fromarray(result)
 		torch_img=pil_to_tensor_grayscale(pil_image)
