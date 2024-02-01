@@ -516,6 +516,66 @@ def keep_bottom_white(image_path):
   cv2.drawContours(mask, [roi_contour], -1, 255, -1)
 
   return mask
+# 向，上，左右进行膨胀
+def upside_down_expansion(image_path, size_up, size_left, size_right):
+  # 读取图片
+  img = cv2.imread(image_path)
+
+  # 预处理  
+  gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  ret, mask = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+  # 获取白色区域
+  white = cv2.inRange(mask, 250, 255)
+
+  # 上方向结构元素和膨胀
+  kernel_up = cv2.getStructuringElement(cv2.MORPH_RECT, (size_up,1))
+  dilated_up = cv2.dilate(white, kernel_up, iterations=1)  
+
+  # 左方向结构元素和膨胀
+  kernel_left = cv2.getStructuringElement(cv2.MORPH_RECT, (1,size_left)) 
+  dilated_left = cv2.dilate(dilated_up, kernel_left, iterations=1)
+
+  # 右方向结构元素和膨胀
+  kernel_right = cv2.getStructuringElement(cv2.MORPH_RECT, (1,size_right))
+  dilated = cv2.dilate(dilated_left, kernel_right, iterations=1)
+
+  # 返回结果
+  mask[white!=0] = dilated[white!=0] 
+
+  return mask
+
+# 上左右膨胀图片
+class UDEImage:
+	def __init__(self):
+		pass
+	@classmethod
+	def INPUT_TYPES(s):
+		return {
+			"required": {
+				"image": ("IMAGE",),
+                "amount": ("INT", {"default": 1, "min": 1, "max": 64}),
+			},
+            "optional": {
+                "image": ("IMAGE",)
+            }
+		}
+	RETURN_TYPES = ("IMAGE",)
+	FUNCTION = "UDEImage"
+	CATEGORY = "remote"
+	def UDEImage(self, image,amount):
+		face=tensor_to_pil(image)
+		path="/root/autodl-tmp/ComfyUI/tests/img/a.png"
+		face.save(path)
+		mask=upside_down_expansion(path,amount,amount,amount)
+		result = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
+		pil_image = Image.fromarray(result)
+		torch_img=pil_to_tensor_grayscale(pil_image)
+		return (torch_img,)
+
+        
+     
+     
 class ImageCImage:
 	def __init__(self):
 		pass
