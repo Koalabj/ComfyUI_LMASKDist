@@ -519,26 +519,26 @@ def keep_bottom_white(image_path):
 # 向，上，左右进行膨胀
 def upside_down_expansion(image_path, dilation_value):
   # 读取图像
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+	image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     
     # 创建自定义的核，下方不膨胀
-    kernel_height = dilation_value * 2 + 1
-    kernel = np.zeros((kernel_height, kernel_height), np.uint8)
+	kernel_height = dilation_value * 2 + 1
+	kernel = np.zeros((kernel_height, kernel_height), np.uint8)
     
     # 中间行全为1
-    kernel[dilation_value, :] = 1
+	kernel[dilation_value, :] = 1
     
     # 上方填充为1
-    kernel[:dilation_value, :] = 1
+	kernel[:dilation_value, :] = 1
     
     # 左右两列填充为1
-    kernel[:, 0] = 1
-    kernel[:, -1] = 1
+	kernel[:, 0] = 1
+	kernel[:, -1] = 1
     
     # 对图像进行膨胀操作
-    dilated_image = cv2.dilate(image, kernel, iterations=1)
+	dilated_image = cv2.dilate(image, kernel, iterations=1)
 
-  return mask
+	return dilated_image
 
 # 上左右膨胀图片
 class UDEImage:
